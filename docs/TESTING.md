@@ -109,8 +109,12 @@ User-research note: recurring wishes for browser PDF tools are consistent annota
 
 - Resizing the window keeps the reading position: with page 2 scrolled 17% into view, shrinking to 1000px and restoring to 1280px kept the same fraction (0.170 → 0.177 → 0.170). The earlier "resize resets scroll position" note was wrong and is retired.
 
+## 2026-09-29 — seventeenth session (image-only document)
+
+- Generated a 40-page image-only PDF (`public/samples/scanned.pdf`, JPEG pages from screenshots, letterboxed on Letter pages). Load to first render ~3 s including page load; 2 pages rendered initially, 19 MB heap. Jumping to the end and scrolling back 20 frames took 314 ms (~16 ms/frame); 10 page canvases and 13 thumbnails cached, 18 MB heap; no console warnings. Visible pages showed white because the visible region was letterbox padding; pixel sampling confirmed the canvases contain the images.
+
 Open issues / follow-ups:
 - Switching documents very quickly logs a benign "Transport destroyed" console error from the previous viewer initialization.
 - The delete icon of the PDF.js floating editor toolbar renders detached below its button in this build; the button itself works. Investigate CSS nesting/mask rules.
 - Printing was not exercised in the headless browser.
-- Not yet tested: XFA, very large scanned PDFs, touch devices, Firefox and Safari.
+- Not yet tested: XFA, multi-megabyte scans with unique images per page, touch devices, Firefox and Safari.
