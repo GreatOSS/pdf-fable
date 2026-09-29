@@ -564,10 +564,11 @@ export class LeaflineApp {
     if (!["auto", "page-width"].includes(v.currentScaleValue)) return;
     let maxW = 0;
     for (let i = 0; i < v.pagesCount; i++) maxW = Math.max(maxW, (v.getPageView(i) as { width: number }).width);
-    const available = this.container.clientWidth - 16;
+    // PDF.js pages carry a 9px transparent border per side; keep 2px slack for rounding.
+    const available = this.container.clientWidth - 20;
     if (maxW > available) {
       const preset = v.currentScaleValue;
-      const scale = v.currentScale * available / maxW;
+      const scale = Math.floor(v.currentScale * available / maxW * 1000) / 1000;
       this.fitted = { preset, scale };
       v.currentScaleValue = String(scale);
       $<HTMLSelectElement>("zoomSelect").value = preset;

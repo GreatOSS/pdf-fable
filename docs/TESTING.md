@@ -198,6 +198,14 @@ Chromium via Playwright, dev server, `arxiv.pdf` (15 pages), 1280×720.
 - Menu → No spreads, then Menu → Wrapped: at Automatic zoom the layout is one page per row (Automatic fits page width, as in PDF.js); at 50% it forms a two-column grid with no overflow. Menu radios show "Wrapped" and "No spreads" checked. Preferences persist under `leafline.scrollMode` / `leafline.spreadMode`.
 - No defects found; no code changes.
 
+## 2026-09-29 — thirty-second session (ink on a /Rotate 90 page; 1px overflow fix)
+
+Chromium via Playwright, dev server, `welcome.pdf` page 7 (stored with /Rotate 90), sidebar open.
+
+- Ink stroke drawn on the rotated page, Escape to commit: the saved bytes contain an /Ink annotation with /Rotate 90, Rect [42 116 133 290] inside the 595×842 MediaBox, i.e. at the unrotated bottom-left where the displayed top-left maps. Renders in place after save.
+- Bug found and fixed: with the sidebar open the landscape pages left a 1 px horizontal scrollbar. The widest-page fit allowed 16 px but PDF.js pages carry a 9 px transparent border per side. Allowance is now 20 px and the computed scale is floored to 3 decimals. Verified overflow 0 with the sidebar open and closed.
+- Note (PDF.js behaviour, not changed): the Automatic preset is computed from the current page, so re-fitting while a landscape page is current yields a smaller scale than when a portrait page is current.
+
 ## Open issues / follow-ups
 
 - Switching documents very quickly logs a benign "Transport destroyed" console error from the previous viewer initialization.
