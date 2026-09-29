@@ -37,6 +37,14 @@ Fixed during testing:
 - Password is remembered for the open document, so page operations no longer re-prompt.
 - pdf-lib merge/extract/split refuse encrypted documents instead of producing unreadable pages.
 
+## 2026-09-29 — third session (real-world document)
+
+Tested with a 15-page arXiv paper (LaTeX/hyperref, 2.2 MB, nested outline):
+- Outline panel renders the nested hierarchy; clicking an entry jumps to the section.
+- Internal citation links navigate to the reference; link borders from the document are shown.
+- New: navigation history. Alt+Left/Right (and the browser back/forward buttons) return from outline and link jumps without changing the URL. Verified 10 → 5 → 1 after two jumps.
+- No console errors or warnings on load.
+
 Open issues / follow-ups:
 - Switching documents very quickly logs a benign "Transport destroyed" console error from the previous viewer initialization.
 - The delete icon of the PDF.js floating editor toolbar renders detached below its button in this build; the button itself works. Investigate CSS nesting/mask rules.

@@ -2,7 +2,7 @@
 import * as pdfjs from "pdfjs-dist";
 import type { PDFDocumentProxy } from "pdfjs-dist";
 import workerUrl from "pdfjs-dist/build/pdf.worker.min.mjs?url";
-import { PDFViewer, EventBus, PDFLinkService, PDFFindController, ScrollMode, SpreadMode, FindState, LinkTarget } from "pdfjs-dist/web/pdf_viewer.mjs";
+import { PDFViewer, EventBus, PDFLinkService, PDFFindController, PDFHistory, ScrollMode, SpreadMode, FindState, LinkTarget } from "pdfjs-dist/web/pdf_viewer.mjs";
 import * as ops from "./pageops";
 import { Thumbnails } from "./thumbnails";
 import { printDocument, clearPrint } from "./print";
@@ -46,6 +46,7 @@ export class LeaflineApp {
   private eventBus = new EventBus();
   private linkService: PDFLinkService;
   private findController: PDFFindController;
+  private pdfHistory: PDFHistory;
   private viewer: PDFViewer;
   private container = $<HTMLDivElement>("viewerContainer");
   private app = $("app");
@@ -83,6 +84,10 @@ export class LeaflineApp {
       enablePrintAutoRotate: true,
     });
     this.linkService.setViewer(this.viewer);
+    // Navigation history (outline/link jumps) without touching the URL; Alt+Left/Right and the
+    // browser back/forward buttons work through it.
+    this.pdfHistory = new PDFHistory({ linkService: this.linkService, eventBus: this.eventBus });
+    this.linkService.setHistory(this.pdfHistory);
     this.thumbs = new Thumbnails($("thumbnails"), {
       onGoTo: (i) => { this.viewer.currentPageNumber = i + 1; this.container.focus(); },
       onMove: (idx, before) => void this.movePages(idx, before),
@@ -252,6 +257,7 @@ export class LeaflineApp {
     this.pendingView = view;
     this.viewer.setDocument(pdf);
     this.linkService.setDocument(pdf, null);
+    this.pdfHistory.initialize({ fingerprint: pdf.fingerprints[0] ?? "", resetHistory: true, updateUrl: false });
     this.thumbs.setDocument(pdf);
     if (old && old !== task) await old.destroy().catch(() => {});
     this.app.dataset.state = "loaded";
@@ -829,6 +835,7 @@ export class LeaflineApp {
         case "Home": e.preventDefault(); this.viewer.currentPageNumber = 1; return;
         case "End": e.preventDefault(); this.viewer.currentPageNumber = this.viewer.pagesCount; return;
         case "ArrowLeft": case "ArrowRight":
+          if (e.altKey) { e.preventDefault(); if (e.key === "ArrowLeft") this.pdfHistory.back(); else this.pdfHistory.forward(); return; }
           if (this.viewer.scrollMode !== ScrollMode.HORIZONTAL && !this.viewer.isHorizontalScrollbarEnabled) {
             e.preventDefault();
             if (e.key === "ArrowLeft") this.viewer.previousPage(); else this.viewer.nextPage();
