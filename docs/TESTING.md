@@ -141,12 +141,6 @@ User-research note: recurring wishes for browser PDF tools are consistent annota
 
 - `npm run build` + `vite preview` on port 4173: sample renders, worker and PDF.js assets (cmaps, fonts, wasm, images) load from the relative base with no failed requests, editor toolbar icons correct, free highlight created, console clean.
 
-Open issues / follow-ups:
-- Switching documents very quickly logs a benign "Transport destroyed" console error from the previous viewer initialization.
-- The delete icon of the PDF.js floating editor toolbar renders detached below its button in this build; the button itself works. Investigate CSS nesting/mask rules.
-- Printing was not exercised in the headless browser.
-- Not yet tested: XFA, multi-megabyte scans with unique images per page, touch devices, Firefox and Safari.
-
 ## 2026-09-29 — twenty-fifth session (outline empty state, About dialog)
 
 Chromium via Playwright, dev server, `welcome.pdf` (no bookmarks).
@@ -154,3 +148,19 @@ Chromium via Playwright, dev server, `welcome.pdf` (no bookmarks).
 - Outline tab on a document without bookmarks shows "This document has no outline." centred in the panel; panel visible, no console errors.
 - Menu → About opens the dialog with name, version v0.1.0 (from package metadata), PDF.js/pdf-lib links and MIT notice; Close is the primary button; Escape closes it.
 - No defects found; no code changes.
+
+## 2026-09-29 — twenty-sixth session (text selection, copy, hand tool)
+
+Chromium via Playwright, dev server, `arxiv.pdf` page 1.
+
+- Mouse drag from the title to the first abstract line selects text in reading order: 501 characters, 26 lines, authors and e-mails included, no stray spans from the rotated arXiv stamp.
+- Ctrl+C runs without error (clipboard contents cannot be read back in the automated browser; selection string verified instead).
+- Clicking the page margin clears the selection. Hand tool (`h`) drag pans the viewer and selects nothing; `v` returns to select.
+- No defects found; no code changes.
+
+## Open issues / follow-ups
+
+- Switching documents very quickly logs a benign "Transport destroyed" console error from the previous viewer initialization.
+- Encrypted documents cannot have their password removed; merge/extract/split are refused on them (pdf-lib cannot re-encrypt).
+- Not yet tested on real hardware: touch gestures, the native save-file picker, clipboard paste of copied text.
+- Not yet tested: XFA forms, multi-megabyte scans with unique images per page, Firefox and Safari.
