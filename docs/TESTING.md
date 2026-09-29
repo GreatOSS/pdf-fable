@@ -244,6 +244,15 @@ Chromium via Playwright, dev server, `arxiv.pdf`, Automatic zoom (1.21).
 - Toolbar + / − buttons step 140% and back to 120%; custom levels are not persisted (preference stays "auto").
 - No defects found; no code changes.
 
+## 2026-09-29 — thirty-eighth session (annotation followed by a page operation)
+
+Chromium via Playwright, dev server, `welcome.pdf`.
+
+- Text note placed on page 1, then page 2 deleted from the sidebar: 6 pages, the note is baked into the reloaded document as a regular `/FreeText` annotation (rendered in the annotation layer and thumbnail), exactly one FreeText object in the bytes, no duplication although the text tool was still active.
+- Ctrl+Z restores 7 pages with the note intact; the document stays dirty because the note predates the page change (correct after the dirty-flag fix).
+- Console: one benign PDF.js warning, font "Helv" not available, fallback used for the note's appearance stream.
+- No defects found; no code changes.
+
 ## Open issues / follow-ups
 
 - Switching documents very quickly logs a benign "Transport destroyed" console error from the previous viewer initialization.
