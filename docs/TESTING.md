@@ -576,6 +576,14 @@ Read the 60-page sample in "Single page" scrolling mode and navigated with keys,
 - **Bug fixed:** jumps typed into the page box were not recorded in the navigation history, so Alt+Left did nothing after them. The box now goes through the link service; verified 22 → 48, Alt+Left → 22, Alt+Right → 48.
 - Note: turning back onto a taller page lands at its top, not its bottom, the same as Firefox's viewer.
 
+### Eighty-second session (horizontal, wrapped and spread layouts)
+
+Switched the welcome document through Horizontal, Wrapped, Odd/Even spreads and Single page + spreads from the menu.
+
+- **Bug fixed (spreads cut off):** with Odd spreads at Automatic zoom the second page was clipped behind a horizontal scrollbar. The widest-page fit only considered single pages and, because it leaves a numeric scale in the viewer, spread and scroll mode changes never re-fitted. The fit now measures the widest *row* (page pairs in spread layouts, page 1 alone for Even spreads) and re-runs on `spreadmodechanged`/`scrollmodechanged`. Verified: odd 0.895 → 0.514 with page 2 fully inside the container, even spreads and the landscape page fine, rotated view re-fits, the equal-size 60-page document fits at 0.604, and No spreads restores the single-page fit. No horizontal overflow in any spread case.
+- **Bug fixed (horizontal mode navigation):** Left/Right arrows fell through to a 40 px native scroll and the wheel only moved vertically, so nothing turned the page. Arrows now turn pages in horizontal mode, and the wheel reads down the page then moves to the next one (same logic as single-page mode). Verified arrows 1 → 2 → 3 → 2, wheel 2 → 3 → 4 with in-page scrolling first, page-fit one page per notch.
+- **Checked, fine:** wrapped mode at this width shows one page per row (the same as Firefox at this zoom); single page + odd spreads shows pages 1–2 together and the wheel scrolls the tall spread before turning; preferences persist for scroll and spread modes.
+
 ## Open issues / follow-ups
 
 - Encrypted documents cannot have their password removed; merge/extract/split are refused on them (pdf-lib cannot re-encrypt).

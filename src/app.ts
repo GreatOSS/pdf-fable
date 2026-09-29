@@ -169,6 +169,9 @@ export class LeaflineApp {
     bus.on("pagesloaded", () => this.fitWidestPage());
     // Rotated pages change their widths, so presets must be re-fitted.
     bus.on("rotationchanging", () => setTimeout(() => this.refitPreset(), 0));
+    // Spreads and horizontal layouts change how many pages share a row, so presets must be re-fitted.
+    bus.on("spreadmodechanged", () => setTimeout(() => this.refitPreset(), 0));
+    bus.on("scrollmodechanged", () => setTimeout(() => this.refitPreset(), 0));
     bus.on("pagechanging", ({ pageNumber }: { pageNumber: number }) => {
       $<HTMLInputElement>("pageInput").value = String(pageNumber);
       this.thumbs.setCurrent(pageNumber - 1);
@@ -529,7 +532,8 @@ export class LeaflineApp {
         this.zoomAt(this.viewer.currentScale * Math.pow(1.1, steps), e.clientX, e.clientY);
         return;
       }
-      if (this.viewer.scrollMode === ScrollMode.PAGE) this.wheelPage(e);
+      // Single-page and horizontal layouts both read "down the page, then on to the next page".
+      if (this.viewer.scrollMode === ScrollMode.PAGE || this.viewer.scrollMode === ScrollMode.HORIZONTAL) this.wheelPage(e);
     }, { passive: false });
     this.bindPinchZoom();
   }
@@ -637,10 +641,19 @@ export class LeaflineApp {
     const v = this.viewer;
     if (!this.pdf || v.hasEqualPageSizes) return;
     if (!["auto", "page-width"].includes(v.currentScaleValue)) return;
-    let maxW = 0;
-    for (let i = 0; i < v.pagesCount; i++) maxW = Math.max(maxW, (v.getPageView(i) as { width: number }).width);
-    // PDF.js pages carry a 9px transparent border per side; keep 2px slack for rounding.
-    const available = this.container.clientWidth - 20;
+    const widths: number[] = [];
+    for (let i = 0; i < v.pagesCount; i++) widths.push((v.getPageView(i) as { width: number }).width);
+    // In spread layouts two pages share a row, so the widest *row* must fit.
+    const spreads = v.spreadMode !== SpreadMode.NONE && v.scrollMode !== ScrollMode.HORIZONTAL;
+    const rows: number[] = [];
+    if (spreads) {
+      let i = 0;
+      if (v.spreadMode === SpreadMode.EVEN) { rows.push(widths[0]); i = 1; }
+      for (; i < widths.length; i += 2) rows.push(widths[i] + (widths[i + 1] ?? 0));
+    } else rows.push(...widths);
+    const maxW = Math.max(...rows);
+    // PDF.js pages carry a 9px transparent border per side; keep 2px slack per page for rounding.
+    const available = this.container.clientWidth - 20 * (spreads ? 2 : 1);
     if (maxW > available) {
       const preset = v.currentScaleValue;
       const scale = Math.floor(v.currentScale * available / maxW * 1000) / 1000;
@@ -1075,7 +1088,9 @@ export class LeaflineApp {
         case "End": e.preventDefault(); this.viewer.currentPageNumber = this.viewer.pagesCount; return;
         case "ArrowLeft": case "ArrowRight":
           if (e.altKey) { e.preventDefault(); if (e.key === "ArrowLeft") this.pdfHistory.back(); else this.pdfHistory.forward(); return; }
-          if (this.viewer.scrollMode !== ScrollMode.HORIZONTAL && !this.viewer.isHorizontalScrollbarEnabled) {
+          // In a horizontal layout the arrows turn pages; elsewhere they do so unless the reader is
+          // zoomed in and the keys are needed to pan.
+          if (this.viewer.scrollMode === ScrollMode.HORIZONTAL || !this.viewer.isHorizontalScrollbarEnabled) {
             e.preventDefault();
             if (e.key === "ArrowLeft") this.viewer.previousPage(); else this.viewer.nextPage();
           }
