@@ -349,6 +349,13 @@ Chromium via Playwright, dev server, `welcome.pdf` page 7.
 - The page's text renders vertically at the right edge of the landscape view; dragging along it with the highlight tool creates a highlight editor on page 7. Saved `/Highlight` has `/Rotate 90`, Rect [55 775 303 795] and quad points x 56–302, y 776–794: a horizontal line near the top of the unrotated 595×842 page, exactly where the rotated view's right-hand vertical line lives.
 - No defects found; no code changes.
 
+## 2026-09-29 — fifty-second session (ink drawn while the view is rotated)
+
+Chromium via Playwright, dev server, `welcome.pdf`, view rotated 90° with `r` (no overflow, landscape layout 943×666).
+
+- Stroke drawn at 20–41 % across / 30–39 % down the rotated view: saved `/Ink` Rect [167 157 224 331] is inside the unrotated 595×842 page, at 28–38 % across and 61–81 % down, which is the correct 90° mapping; the annotation records `/Rotate 90`. After `R` rotates the view back the editor stays on page 1 at 29 % / 62 %.
+- No defects found; no code changes.
+
 ## Open issues / follow-ups
 
 - Switching documents very quickly logs a benign "Transport destroyed" console error from the previous viewer initialization.
