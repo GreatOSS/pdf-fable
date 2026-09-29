@@ -432,6 +432,13 @@ Chromium via Playwright, dev server, `welcome.pdf` open.
 - CI green on the rapid-undo fixes. Opening a non-PDF file still shows "Could not open "bogus.txt": Invalid PDF structure." and keeps the current document. Opening the encrypted sample then pressing Escape at the password prompt closes the dialog silently: no error toast, previous document intact, loading overlay hidden, app not busy. Console shows only PDF.js's own InvalidPDFException for the bogus file.
 - No defects found; no code changes.
 
+## 2026-09-29 — sixty-fourth session (rapid document switching)
+
+Chromium via Playwright, dev server, welcome screen.
+
+- Three loads fired back to back (long, arXiv, welcome) without waiting: the last one wins (title "Welcome to Leafline", 7 pages, 7 thumbnails), the loading overlay hides, no toasts, and no console errors or warnings; the superseded loads are silent since the rapid-undo fix.
+- No defects found; no code changes.
+
 ## Open issues / follow-ups
 
 - Encrypted documents cannot have their password removed; merge/extract/split are refused on them (pdf-lib cannot re-encrypt).
