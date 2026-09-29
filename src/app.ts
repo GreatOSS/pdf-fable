@@ -163,6 +163,8 @@ export class LeaflineApp {
       this.setTool(v?.page === undefined ? "select" : this.tool);
       this.container.focus();
     });
+    // Real page sizes arrive after pagesinit (placeholders use the first page's size until then).
+    bus.on("pagesloaded", () => this.fitWidestPage());
     bus.on("pagechanging", ({ pageNumber }: { pageNumber: number }) => {
       $<HTMLInputElement>("pageInput").value = String(pageNumber);
       this.thumbs.setCurrent(pageNumber - 1);

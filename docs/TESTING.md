@@ -58,6 +58,11 @@ User-research note: recurring wishes for browser PDF tools are consistent annota
 - Implemented two-finger pinch zoom on the viewer via pointer events (browser pinch disabled with `touch-action: pan-x pan-y`), anchored at the finger midpoint, one re-scale per animation frame.
 - Verified with synthetic touch pointer events on the arXiv paper: spreading fingers 3× took the scale from 1.25 to 3.6 and the scroll position followed the anchor; closing fingers returned to 1.3. No console errors. Not yet verified on a physical touch device.
 
+## 2026-09-29 — sixth session (draw tool, fit regression)
+
+- Draw tool: a freehand stroke serializes as an `/Ink` annotation; Escape returns to the select tool; no console errors.
+- Regression found: with the sidebar closed, the widest-page fit did not apply on load because PDF.js sizes all pages like the first one until they are loaded. The fit now also runs on `pagesloaded`; verified no horizontal overflow at 1265px with the landscape page present.
+
 Open issues / follow-ups:
 - Resizing the window resets the scroll position to the top of the current page.
 - Switching documents very quickly logs a benign "Transport destroyed" console error from the previous viewer initialization.
