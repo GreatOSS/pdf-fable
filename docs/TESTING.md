@@ -214,6 +214,14 @@ Chromium via Playwright, dev server, `welcome.pdf` at 420×800 after the 20 px f
 - Two-row toolbar: rightmost buttons (save on row 2, menu on row 1) end at 414 px, aligned and unclipped; no document-level horizontal scroll.
 - No defects found; no code changes.
 
+## 2026-09-29 — thirty-fourth session (radio buttons and dropdown)
+
+Chromium via Playwright, dev server, `welcome.pdf` page 6.
+
+- Clicking the "Dark" radio checks it and unchecks "Light"; choosing "Deutsch" in the language dropdown marks the document dirty.
+- Saved bytes: incremental update sets the `theme` field /V /1 with the widget /AS /1, and the `language` choice field /V (Deutsch) with a regenerated appearance stream drawing "Deutsch". Text field and checkbox were verified in the first session.
+- No defects found; no code changes.
+
 ## Open issues / follow-ups
 
 - Switching documents very quickly logs a benign "Transport destroyed" console error from the previous viewer initialization.
