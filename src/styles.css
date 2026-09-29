@@ -180,7 +180,8 @@ li.collapsed > .outline-list { display: none; }
 .dialog h2 { margin: 0 0 10px; font-size: 18px; }
 .dialog p { margin: 0 0 12px; color: var(--fg-muted); }
 .dialog input[type="password"], .dialog input[type="url"] { width: 100%; height: 34px; border: 1px solid var(--border); border-radius: 6px; padding: 0 10px; background: var(--bg); }
-.dialog-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 16px; }
+/* Primary button comes first in the DOM so Enter activates it; reversed visually so it sits on the right. */
+.dialog-actions { display: flex; flex-direction: row-reverse; justify-content: flex-start; gap: 8px; margin-top: 16px; }
 .props { display: grid; grid-template-columns: max-content 1fr; gap: 6px 16px; margin: 0; }
 .props dt { color: var(--fg-muted); }
 .props dd { margin: 0; word-break: break-word; }

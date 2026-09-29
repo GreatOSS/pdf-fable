@@ -92,6 +92,10 @@ User-research note: recurring wishes for browser PDF tools are consistent annota
 - Pan tool: dragging 400px scrolls the document by 400px and selects no text.
 - Automation caveat (not an app bug): the Playwright MCP connection drops when its own `locator.click()` triggers a browser download; trigger downloads from page script or the keyboard in automated tests.
 
+## 2026-09-29 — thirteenth session (dialogs)
+
+- Bug found: pressing Enter in the "Open from URL" and password dialogs activated Cancel, because Cancel was the first submit button in the form. The primary button now comes first in the DOM (visually still on the right). Verified: Enter with a bad URL shows "Could not open … Invalid PDF structure" and keeps the current document; Enter after typing the password opens the encrypted sample.
+
 Open issues / follow-ups:
 - Resizing the window resets the scroll position to the top of the current page.
 - Switching documents very quickly logs a benign "Transport destroyed" console error from the previous viewer initialization.
