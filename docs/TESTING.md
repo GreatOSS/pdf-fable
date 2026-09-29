@@ -518,6 +518,15 @@ Opened the 40-page image-only scan and worked it like a reader tidying a scan.
 - **Bug fixed:** after rotating selected pages the selection was lost, because the document reload rebuilt the thumbnails. A reader could not rotate again or delete the same pages without reselecting. Rotation now restores the selection; verified by selecting pages 2–3, rotating twice, then deleting them straight away (38 pages saved), and by rotating pages 5–6 counter-clockwise (pypdf shows /Rotate 270 on both, selection still "2 selected" afterwards). Ctrl+Z after the delete restored the pages with their rotation intact.
 - **UX fixed:** searching a scan said "Phrase not found", implying the word was simply absent. The find bar now checks the first few pages for text and says "No searchable text in this document (scanned pages?)" when there is none. Text documents still say "Phrase not found" and normal matches are unaffected.
 
+### Seventy-sixth session (merge, reorder across page sizes, undo chain)
+
+Merged the A5 `second.pdf` into the A4 welcome document through the Merge PDF picker, then reordered and undid.
+
+- **Merge:** 10 pages, toast "Merged 1 file(s)", zoom stayed on Automatic, pages 8–10 render at their own A5 width beside the A4 pages, thumbnails match. No console errors.
+- **Drag reorder:** dragged thumbnail 8 (first merged page) to the front; page 1 became the A5 page, toast "Moved page 8". Saved bytes confirmed with pypdf: 10 pages, first page 420×595, remaining order intact. Note for future sessions: the drag only registers when the source thumbnail is inside the visible thumbnail list, so use a tall viewport (3200px for 10 pages).
+- **Undo chain:** Ctrl+Z restored the original order (page 1 A4, page 8 A5); a second Ctrl+Z in an earlier run reverted the merge to 7 pages and cleared the dirty flag. Both steps showed a single "Page change undone" toast.
+- No product problems found.
+
 ## Open issues / follow-ups
 
 - Encrypted documents cannot have their password removed; merge/extract/split are refused on them (pdf-lib cannot re-encrypt).
