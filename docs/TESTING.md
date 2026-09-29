@@ -425,6 +425,13 @@ Chromium via Playwright, dev server, `second.pdf`.
 - Eleven consecutive page rotations (avg 252 ms each) keep exactly 10 undo entries; page 1 ends at 270°, ten undos bring it to 90° (the eleventh-oldest change is beyond the cap, as designed) and the document stays dirty.
 - Found and fixed: a held Ctrl+Z started a second reload while the previous one was in flight (undo did not hold the busy flag), and the superseded load surfaced spurious "Could not open … Loading aborted" error toasts. Undo now holds the busy flag, superseded loads no longer report an error, repeated "Page change undone" toasts replace each other instead of stacking, and thumbnails no longer warn about a destroyed transport when the document is swapped mid-render. Re-run: five rotations, eight rapid Ctrl+Z presses → original state, one toast, no console errors or warnings.
 
+## 2026-09-29 — sixty-third session (load-error regression after the rapid-undo fix)
+
+Chromium via Playwright, dev server, `welcome.pdf` open.
+
+- CI green on the rapid-undo fixes. Opening a non-PDF file still shows "Could not open "bogus.txt": Invalid PDF structure." and keeps the current document. Opening the encrypted sample then pressing Escape at the password prompt closes the dialog silently: no error toast, previous document intact, loading overlay hidden, app not busy. Console shows only PDF.js's own InvalidPDFException for the bogus file.
+- No defects found; no code changes.
+
 ## Open issues / follow-ups
 
 - Encrypted documents cannot have their password removed; merge/extract/split are refused on them (pdf-lib cannot re-encrypt).
