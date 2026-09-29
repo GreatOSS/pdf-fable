@@ -302,6 +302,7 @@ Chromium via Playwright, `vite preview` on port 4173.
 Chromium via Playwright, dev server, `welcome.pdf`.
 
 - With a text note being edited, pressing r, v, h, ? and End inserts "rvh?" into the note and moves the caret; the view is not rotated, the tool stays "freetext", the shortcuts dialog does not open and the page does not change. Earlier sessions showed the same for the find field ("Reading" typed without side effects).
+- A PDF.js "Cannot read properties of null (reading 'addButton')" error appeared only when the note was deleted programmatically mid-edit from the console; the real user path (type, switch to the select tool, reselect the note) logs no errors.
 - No defects found; no code changes.
 
 ## Open issues / follow-ups
