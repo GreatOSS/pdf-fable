@@ -101,6 +101,10 @@ User-research note: recurring wishes for browser PDF tools are consistent annota
 - "?" opens the shortcuts dialog; layout readable.
 - F5 presentation mode: fullscreen, single page, page-fit, black background; ArrowRight pages forward. Fixed: page margins/scrollbar showed in presentation; Escape now also exits in-app; presentation's page-fit no longer overwrites the persisted zoom preset, and the previous preset (with widest-page fit) is restored on exit.
 
+## 2026-09-29 — fifteenth session (spreads)
+
+- Odd spreads on the arXiv paper: pages paired 1–2, 3–4, 5–6; Automatic zoom fits both pages side by side without horizontal overflow; preference persists.
+
 Open issues / follow-ups:
 - Resizing the window resets the scroll position to the top of the current page.
 - Switching documents very quickly logs a benign "Transport destroyed" console error from the previous viewer initialization.
