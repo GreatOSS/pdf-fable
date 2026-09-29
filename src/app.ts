@@ -63,6 +63,7 @@ export class LeaflineApp {
   private undoToast: ToastElement | null = null;
   private outlineEntries: { page: number; link: HTMLButtonElement }[] = [];
   private textProbe: { pdf: PDFDocumentProxy; result: Promise<boolean> } | null = null;
+  private pendingStampPicker = false;
   private outlineCurrent: HTMLButtonElement | null = null;
   private undoneToast: ToastElement | null = null;
   private loadingTask: ReturnType<typeof pdfjs.getDocument> | null = null;
@@ -190,6 +191,8 @@ export class LeaflineApp {
     bus.on("annotationeditoruimanager", ({ uiManager }: { uiManager: unknown }) => { this.uiManager = uiManager; });
     bus.on("annotationeditormodechanged", ({ mode }: { mode: number }) => {
       if (mode === EditorType.NONE && TOOL_MODE[this.tool] !== EditorType.NONE) this.setTool("select");
+      // The image picker must open only once the layer is really in stamp mode (the switch can be deferred).
+      if (mode === EditorType.STAMP && this.pendingStampPicker) { this.pendingStampPicker = false; this.dispatchParam("CREATE", null); }
     });
     bus.on("editingstateschanged", ({ details }: { details: Record<string, boolean> }) => {
       $<HTMLButtonElement>("btnUndo").disabled = !details.hasSomethingToUndo;
@@ -444,6 +447,12 @@ export class LeaflineApp {
     }
   }
 
+  /** Open the stamp editor's file picker, waiting for the mode switch when PDF.js defers it. */
+  private openImagePicker(): void {
+    if (this.viewer.annotationEditorMode.mode === EditorType.STAMP) { this.pendingStampPicker = false; this.dispatchParam("CREATE", null); return; }
+    this.pendingStampPicker = true;
+  }
+
   private dispatchParam(name: string, value: unknown): void {
     const type = (ParamType as unknown as Record<string, number>)[name];
     if (type === undefined) return;
@@ -501,7 +510,7 @@ export class LeaflineApp {
         const t = b.dataset.tool as Tool;
         if (t === this.tool && TOOL_MODE[t] !== EditorType.NONE) { this.setTool("select"); return; }
         this.setTool(t);
-        if (t === "stamp") this.dispatchParam("CREATE", null);
+        if (t === "stamp") this.openImagePicker();
       };
     });
     $("btnFind").onclick = () => this.toggleFind();

@@ -545,6 +545,17 @@ Started from a fresh tab as a first-time user and opened files by drag and drop.
 - **Unsaved changes guard:** with a fresh text note, dropping another PDF asks "You have unsaved changes. Discard them and open another document?". Accepting opens the new file; cancelling (confirm stubbed to false, since the browser harness auto-accepts native dialogs) keeps the document, the note and the dirty flag.
 - **Rough edge fixed:** with no document open the sidebar still showed "Select all / Blank page / Merge PDF…" and the "Click a page to jump to it" hint, none of which could do anything. The page tools now hide in the empty state and both panels show a short "Open a document to see its pages/outline here." hint; verified on the welcome screen and after opening the sample (tools back, hints gone, "no outline" message intact).
 
+### Seventy-ninth session (image stamp tool)
+
+Used the Add image tool end to end. The native picker cannot be driven, so `HTMLInputElement.prototype.click` was hooked to capture PDF.js's file input and a canvas-generated PNG was fed through it.
+
+- **Insert:** clicking the tool opens the picker (accept list covers PNG/JPEG/SVG/WebP…); the image lands centred on the page, selected, with the alt-text and delete affordances, and the dirty dot appears.
+- **Move and resize:** dragging the stamp moves it; the bottom-right handle scales it with the aspect ratio kept (200×120 → 319×191 px). Escape and Done return to the select tool.
+- **Save:** pypdf shows a /Stamp annotation whose appearance carries a 200×120 Flate image XObject at the resized rectangle.
+- **Editor undo/redo:** Ctrl+Z removes the second stamp, Redo restores it; undo/redo buttons enable correctly.
+- **Bug fixed:** after cancelling the picker (or toggling the tool off and on), clicking the Add image tool again never reopened the picker, because the CREATE request fired before PDF.js finished a deferred editor-mode switch. The picker request now waits for the `annotationeditormodechanged` event when the layer is not yet in stamp mode. Verified five consecutive tool clicks each open the picker, across cancel, toggle, switch-from-text and with an existing stamp. The "Add image…" bar button was unaffected.
+- Known: thumbnails do not show unsaved editor content (matches Firefox's viewer); they update after save/reload.
+
 ## Open issues / follow-ups
 
 - Encrypted documents cannot have their password removed; merge/extract/split are refused on them (pdf-lib cannot re-encrypt).
