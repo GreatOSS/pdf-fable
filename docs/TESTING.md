@@ -297,6 +297,13 @@ Chromium via Playwright, `vite preview` on port 4173.
 - CI green on the theme fix. The built `index.html` keeps the inline theme script in the head ahead of the hoisted module script and the body. With the dark preference stored, `data-theme` is already "dark" at DOMContentLoaded and the sample loads normally (7 pages, title set).
 - No defects found; no code changes.
 
+## 2026-09-29 — forty-fifth session (typing guard for single-key shortcuts)
+
+Chromium via Playwright, dev server, `welcome.pdf`.
+
+- With a text note being edited, pressing r, v, h, ? and End inserts "rvh?" into the note and moves the caret; the view is not rotated, the tool stays "freetext", the shortcuts dialog does not open and the page does not change. Earlier sessions showed the same for the find field ("Reading" typed without side effects).
+- No defects found; no code changes.
+
 ## Open issues / follow-ups
 
 - Switching documents very quickly logs a benign "Transport destroyed" console error from the previous viewer initialization.
