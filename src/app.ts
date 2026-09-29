@@ -237,8 +237,24 @@ export class LeaflineApp {
     return confirmDialog("You have unsaved changes. Discard them and open another document?");
   }
 
+  /** Plain-language explanations for the ways a file can fail to open. */
+  private describeOpenError(e: Error, name: string, probe?: { size: number; head: string }): string {
+    const msg = String(e?.message ?? e);
+    if (e?.name === "MissingPDFException" || /missing pdf/i.test(msg)) return `Could not find "${name}".`;
+    if (e?.name === "UnexpectedResponseException") return `Could not download "${name}" (server error).`;
+    if (/empty/i.test(msg) || probe?.size === 0) return `"${name}" is empty (0 bytes).`;
+    if (e?.name === "InvalidPDFException") {
+      // PDF.js accepts a header anywhere in the first 1 KB; if none is there this is not a PDF at all.
+      if (probe && !probe.head.includes("%PDF")) return `"${name}" is not a PDF file.`;
+      return `"${name}" is damaged or not a valid PDF (${msg.replace(/\.$/, "").toLowerCase()}).`;
+    }
+    return `Could not open "${name}": ${msg}`;
+  }
+
   private async load(src: { data?: Uint8Array; url?: string }, name: string, view: PendingView & { dirty?: boolean }): Promise<void> {
     this.setLoading(true, "Loading…");
+    // PDF.js transfers the buffer to its worker (detaching it), so record what we need for error messages now.
+    const probe = src.data ? { size: src.data.length, head: new TextDecoder("latin1").decode(src.data.subarray(0, 1024)) } : undefined;
     this.loadingTask?.destroy().catch(() => {});
     const task = pdfjs.getDocument({
       ...src,
@@ -265,8 +281,8 @@ export class LeaflineApp {
       const e = err as Error;
       // A load superseded by a newer one (or cancelled at the password prompt) is not an error to report.
       if (e?.name === "PasswordException" || this.loadingTask !== task || /destroyed|aborted/i.test(String(e?.message))) { this.setLoading(false); return; }
-      console.error(err);
-      toast(`Could not open "${name}": ${e?.message ?? e}`, "error", 6000);
+      console.warn("open failed", err);
+      toast(this.describeOpenError(e, name, probe), "error", 6000);
     } finally {
       this.setLoading(false);
     }

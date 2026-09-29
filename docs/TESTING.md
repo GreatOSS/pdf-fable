@@ -672,6 +672,15 @@ Created a note, saved and reopened the bytes as a new file, then edited and dele
 - **Delete:** selecting the editor and pressing Delete removes it, enables editor Undo and sets the dirty flag. Saved bytes: no annotations on page 1. The original section stays in the DOM only as PDF.js's hidden placeholder.
 - Only the benign "Helv" font-fallback warnings; no errors. Thumbnails keep the pre-edit rendering until the next reload (known).
 
+### Ninety-third session (malformed input: truncated, empty, non-PDF, missing)
+
+Opened a 6 KB truncated PDF, a zero-byte file, an HTML file, a fake JPEG, a PDF renamed to `.txt`, and a missing URL, both from the welcome screen and while a document was open.
+
+- **Robustness:** every failure leaves the app usable: the welcome screen stays (or the open document stays with its 7 pages), the loading overlay clears, no dialog is left open, and a good file opens afterwards. A PDF renamed to `.txt` opens by content.
+- **Messages improved:** failures used PDF.js's internal wording ("Invalid PDF structure", "The PDF file is empty, i.e. its size is zero bytes.") and a missing URL read as a damaged file. Messages are now: `"x" is damaged or not a valid PDF (invalid pdf structure).`, `"x" is empty (0 bytes).`, `"x" is not a PDF file.` (no %PDF header in the first 1 KB), `Could not find "x".` for a missing download, and a server-error variant. Failures are logged as warnings rather than console errors.
+- **Bug caught while fixing:** PDF.js transfers the byte buffer to its worker, so the array is detached (length 0) by the time the error arrives; the first version reported every file-based failure as "empty". Size and header are now captured before the buffer is handed over.
+- Note: on the dev server a missing `?file=` URL still reports "damaged", because Vite answers unknown paths with the app's HTML; a static host returns 404 and gets "Could not find".
+
 ## Open issues / follow-ups
 
 - Encrypted documents cannot have their password removed; merge/extract/split are refused on them (pdf-lib cannot re-encrypt).
