@@ -204,7 +204,9 @@ export class Thumbnails {
       await task.promise;
       this.tasks.delete(i);
     } catch (err) {
-      if ((err as Error)?.name !== "RenderingCancelledException") console.warn("thumbnail render failed", err);
+      // Stale renders (document replaced mid-flight) and cancellations are expected; only warn otherwise.
+      const stale = gen !== this.generation || /destroyed/i.test(String((err as Error)?.message));
+      if (!stale && (err as Error)?.name !== "RenderingCancelledException") console.warn("thumbnail render failed", err);
       delete el.dataset.rendered;
     }
   }

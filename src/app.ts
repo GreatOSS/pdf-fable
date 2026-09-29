@@ -61,6 +61,7 @@ export class LeaflineApp {
   private thumbs: Thumbnails;
   private history: { bytes: Uint8Array; dirty: boolean }[] = [];
   private undoToast: ToastElement | null = null;
+  private undoneToast: ToastElement | null = null;
   private loadingTask: ReturnType<typeof pdfjs.getDocument> | null = null;
   private docTask: ReturnType<typeof pdfjs.getDocument> | null = null;
   private busy = false;
@@ -252,7 +253,8 @@ export class LeaflineApp {
       await this.setDocument(pdf, task, name, view);
     } catch (err) {
       const e = err as Error;
-      if (e?.name === "PasswordException" || /destroyed/i.test(String(e?.message))) { this.setLoading(false); return; }
+      // A load superseded by a newer one (or cancelled at the password prompt) is not an error to report.
+      if (e?.name === "PasswordException" || this.loadingTask !== task || /destroyed|aborted/i.test(String(e?.message))) { this.setLoading(false); return; }
       console.error(err);
       toast(`Could not open "${name}": ${e?.message ?? e}`, "error", 6000);
     } finally {
@@ -380,8 +382,16 @@ export class LeaflineApp {
     if (!prev || this.busy) return;
     this.undoToast?.dismiss();
     this.undoToast = null;
-    await this.load({ data: prev.bytes }, this.fileName, { page: this.viewer.currentPageNumber, scaleValue: this.fitted?.preset ?? this.viewer.currentScaleValue, dirty: prev.dirty });
-    toast("Page change undone", "info");
+    // Hold the busy flag so a held Ctrl+Z cannot start a second reload while this one is in flight.
+    this.busy = true;
+    try {
+      await this.load({ data: prev.bytes }, this.fileName, { page: this.viewer.currentPageNumber, scaleValue: this.fitted?.preset ?? this.viewer.currentScaleValue, dirty: prev.dirty });
+    } finally {
+      this.busy = false;
+    }
+    // Rapid repeated undos should not pile up a column of identical toasts.
+    this.undoneToast?.dismiss();
+    this.undoneToast = toast("Page change undone", "info");
   }
 
   private async movePages(indexes: number[], before: number): Promise<void> {

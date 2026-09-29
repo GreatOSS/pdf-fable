@@ -418,9 +418,15 @@ Chromium via Playwright, dev server, `long.pdf`.
 - Delete page 30 via the sidebar: 326 ms from click to reloaded 59-page view; Ctrl+Z restores 60 pages in 243 ms, staying on page 30, history empty and document clean. JS heap 17 → 19 → 18 MB, so snapshots are released.
 - No defects found; no code changes.
 
+## 2026-09-29 — sixty-second session (undo history cap, rapid undo)
+
+Chromium via Playwright, dev server, `second.pdf`.
+
+- Eleven consecutive page rotations (avg 252 ms each) keep exactly 10 undo entries; page 1 ends at 270°, ten undos bring it to 90° (the eleventh-oldest change is beyond the cap, as designed) and the document stays dirty.
+- Found and fixed: a held Ctrl+Z started a second reload while the previous one was in flight (undo did not hold the busy flag), and the superseded load surfaced spurious "Could not open … Loading aborted" error toasts. Undo now holds the busy flag, superseded loads no longer report an error, repeated "Page change undone" toasts replace each other instead of stacking, and thumbnails no longer warn about a destroyed transport when the document is swapped mid-render. Re-run: five rotations, eight rapid Ctrl+Z presses → original state, one toast, no console errors or warnings.
+
 ## Open issues / follow-ups
 
-- Switching documents very quickly logs a benign "Transport destroyed" console error from the previous viewer initialization.
 - Encrypted documents cannot have their password removed; merge/extract/split are refused on them (pdf-lib cannot re-encrypt).
 - Not yet tested on real hardware: touch gestures, the native save-file picker, clipboard paste of copied text.
 - Not yet tested: XFA forms, multi-megabyte scans with unique images per page, Firefox and Safari.
