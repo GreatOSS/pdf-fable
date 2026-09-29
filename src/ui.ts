@@ -2,7 +2,9 @@
 
 export type ToastKind = "info" | "success" | "error";
 
-export function toast(message: string, kind: ToastKind = "info", ms = 3200): HTMLElement {
+export type ToastElement = HTMLElement & { dismiss: () => void };
+
+export function toast(message: string, kind: ToastKind = "info", ms = 3200): ToastElement {
   const host = document.getElementById("toasts")!;
   const el = document.createElement("div");
   el.className = `toast ${kind}`;
@@ -14,8 +16,9 @@ export function toast(message: string, kind: ToastKind = "info", ms = 3200): HTM
     setTimeout(() => el.remove(), 250);
   };
   const t = setTimeout(remove, ms);
-  el.addEventListener("click", () => { clearTimeout(t); remove(); });
-  return el;
+  const dismiss = () => { clearTimeout(t); remove(); };
+  el.addEventListener("click", dismiss);
+  return Object.assign(el, { dismiss });
 }
 
 /** Shows a <dialog> and resolves with its returnValue when it closes. */

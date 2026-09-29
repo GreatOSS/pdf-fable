@@ -6,7 +6,7 @@ import { PDFViewer, EventBus, PDFLinkService, PDFFindController, PDFHistory, Scr
 import * as ops from "./pageops";
 import { Thumbnails } from "./thumbnails";
 import { printDocument, clearPrint } from "./print";
-import { toast, askPassword, askUrl, showDialog, confirmDialog, formatBytes, downloadBytes, debounce } from "./ui";
+import { toast, type ToastElement, askPassword, askUrl, showDialog, confirmDialog, formatBytes, downloadBytes, debounce } from "./ui";
 import { icon } from "./icons";
 
 pdfjs.GlobalWorkerOptions.workerSrc = workerUrl;
@@ -60,6 +60,7 @@ export class LeaflineApp {
   private pendingView: PendingView | null = null;
   private thumbs: Thumbnails;
   private history: { bytes: Uint8Array; dirty: boolean }[] = [];
+  private undoToast: ToastElement | null = null;
   private loadingTask: ReturnType<typeof pdfjs.getDocument> | null = null;
   private docTask: ReturnType<typeof pdfjs.getDocument> | null = null;
   private busy = false;
@@ -361,7 +362,10 @@ export class LeaflineApp {
       this.history.push(snapshot);
       if (this.history.length > 10) this.history.shift();
       await this.load({ data: out }, this.fileName, { page: page ?? this.viewer.currentPageNumber, scaleValue: this.fitted?.preset ?? this.viewer.currentScaleValue, dirty: true });
-      toast(`${label}. Click here or press Ctrl+Z to undo.`, "success", 10000).onclick = () => void this.undoPageOp();
+      // Only the latest change can be undone, so never show two undo toasts at once.
+      this.undoToast?.dismiss();
+      this.undoToast = toast(`${label}. Click here or press Ctrl+Z to undo.`, "success", 10000);
+      this.undoToast.onclick = () => void this.undoPageOp();
     } catch (err) {
       console.error(err);
       toast(`Page change failed: ${(err as Error).message}`, "error", 6000);
@@ -374,6 +378,8 @@ export class LeaflineApp {
   private async undoPageOp(): Promise<void> {
     const prev = this.history.pop();
     if (!prev || this.busy) return;
+    this.undoToast?.dismiss();
+    this.undoToast = null;
     await this.load({ data: prev.bytes }, this.fileName, { page: this.viewer.currentPageNumber, scaleValue: this.fitted?.preset ?? this.viewer.currentScaleValue, dirty: prev.dirty });
     toast("Page change undone", "info");
   }
