@@ -25,8 +25,20 @@ Fixed during testing:
 - A custom zoom level (from Ctrl+wheel) was persisted and restored for the next document; only presets are persisted now.
 - Undo for page changes: toast lasts 10 s and Ctrl+Z (outside annotation tools) or the menu undoes the last page change.
 
+## 2026-09-29 — follow-up session
+
+Verified working:
+- Print pipeline: all 7 sample pages rasterized at 150 DPI with a matching `@page` size and `window.print` invoked (print dialog itself not observable headless).
+- Encrypted PDF (AES-256, user password "leaf", fixture `tests/fixtures/encrypted.pdf` made with pypdf): password prompt, "Incorrect password" retry, successful open, page delete on the encrypted document (result decrypts and renders), merge refused with a clear message.
+- Zoom label shows "Automatic" after the widest-page fit on load and on preset change.
+
+Fixed during testing:
+- PDF.js floating editor toolbar delete icon rendered detached: our global `button { font: inherit }` made it inherit the editor's scaled font size. Editor buttons now have a fixed font.
+- Password is remembered for the open document, so page operations no longer re-prompt.
+- pdf-lib merge/extract/split refuse encrypted documents instead of producing unreadable pages.
+
 Open issues / follow-ups:
-- After fitting the widest page, the zoom select shows a percentage instead of "Automatic"; consider keeping the preset label.
+- Switching documents very quickly logs a benign "Transport destroyed" console error from the previous viewer initialization.
 - The delete icon of the PDF.js floating editor toolbar renders detached below its button in this build; the button itself works. Investigate CSS nesting/mask rules.
 - Printing was not exercised in the headless browser.
-- Not yet tested: password-protected PDFs, XFA, very large scanned PDFs, touch devices, Firefox and Safari.
+- Not yet tested: XFA, very large scanned PDFs, touch devices, Firefox and Safari.

@@ -77,6 +77,10 @@ export async function insertBlankPage(bytes: Uint8Array, index: number): Promise
 export async function insertPdf(bytes: Uint8Array, other: Uint8Array, index?: number): Promise<Uint8Array> {
   const doc = await load(bytes);
   const src = await load(other);
+  // pdf-lib passes encrypted objects through untouched; pages copied between documents with
+  // different encryption would be unreadable.
+  if (doc.isEncrypted) throw new Error("Merging into a password-protected PDF is not supported.");
+  if (src.isEncrypted) throw new Error("The file to merge is password-protected; remove its password first.");
   const copied = await doc.copyPages(src, src.getPageIndices());
   const at = index === undefined ? doc.getPageCount() : Math.max(0, Math.min(index, doc.getPageCount()));
   copied.forEach((p, k) => doc.insertPage(at + k, p));
@@ -86,6 +90,7 @@ export async function insertPdf(bytes: Uint8Array, other: Uint8Array, index?: nu
 /** Creates a new document containing only the given pages, in the given order. */
 export async function extractPages(bytes: Uint8Array, indexes: number[]): Promise<Uint8Array> {
   const src = await load(bytes);
+  if (src.isEncrypted) throw new Error("Extracting pages from a password-protected PDF is not supported.");
   const wanted = normalize(indexes, src.getPageCount());
   if (wanted.length === 0) throw new Error("Select at least one page to extract.");
   const doc = await PDFDocument.create();
@@ -112,6 +117,7 @@ export async function reorderPages(bytes: Uint8Array, order: number[]): Promise<
 /** Splits every page into its own single-page document. */
 export async function splitPages(bytes: Uint8Array): Promise<Uint8Array[]> {
   const src = await load(bytes);
+  if (src.isEncrypted) throw new Error("Splitting a password-protected PDF is not supported.");
   const out: Uint8Array[] = [];
   for (const i of src.getPageIndices()) {
     const doc = await PDFDocument.create();

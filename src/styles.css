@@ -186,6 +186,10 @@ li.collapsed > .outline-list { display: none; }
 .shortcuts td:nth-child(even) { color: var(--fg-muted); padding-right: 24px; }
 
 /* PDF.js overrides */
+/* Our global `button { font: inherit }` would make editor-toolbar buttons inherit the editor's
+   scaled font size and push their icon pseudo-elements off the baseline. */
+.annotationEditorLayer button, .editToolbar button { font: 13px/1 var(--font); }
+.editToolbar .buttons > *::before { display: block; }
 .pdfViewer .page { margin: 8px auto; border-image: none; box-shadow: 0 1px 5px rgba(0,0,0,0.25); }
 .pdfViewer.removePageBorders .page { margin: 0 auto; }
 .viewer-container .pdfViewer { padding: 6px 0; }

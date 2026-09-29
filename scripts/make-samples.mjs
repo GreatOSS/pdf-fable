@@ -138,6 +138,10 @@ async function mergeMe() {
   writeFileSync(join(out, "second.pdf"), await doc.save());
 }
 
+// Encrypted sample (user password "leaf"), generated once with pypdf and kept as a test fixture.
+import { copyFileSync } from "node:fs";
+copyFileSync(join(root, "tests", "fixtures", "encrypted.pdf"), join(out, "encrypted.pdf"));
+
 await welcome();
 await longDoc();
 await mergeMe();

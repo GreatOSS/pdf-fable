@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeAll } from "vitest";
 import { PDFDocument, StandardFonts } from "pdf-lib";
 import * as ops from "../src/pageops";
+import { readFileSync } from "node:fs";
 
 let base: Uint8Array;
 
@@ -84,6 +85,17 @@ describe("pageops", () => {
   it("reorders pages by permutation", async () => {
     expect(await widths(await ops.reorderPages(base, [4, 3, 2, 1, 0]))).toEqual([305, 304, 303, 302, 301]);
     await expect(ops.reorderPages(base, [0, 0, 1, 2, 3])).rejects.toThrow(/Invalid/);
+  });
+
+  it("keeps in-place operations working on encrypted files but refuses cross-document copies", async () => {
+    const enc = new Uint8Array(readFileSync(new URL("./fixtures/encrypted.pdf", import.meta.url)));
+    const out = await ops.deletePages(enc, [1]);
+    expect(await ops.pageCount(out)).toBe(6);
+    const rotated = await ops.rotatePages(enc, [0], 90);
+    expect((await PDFDocument.load(rotated, { ignoreEncryption: true })).getPage(0).getRotation().angle).toBe(90);
+    await expect(ops.insertPdf(enc, base)).rejects.toThrow(/password-protected/);
+    await expect(ops.insertPdf(base, enc)).rejects.toThrow(/password-protected/);
+    await expect(ops.extractPages(enc, [0])).rejects.toThrow(/password-protected/);
   });
 
   it("splits into single-page documents", async () => {

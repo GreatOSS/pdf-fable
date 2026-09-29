@@ -62,6 +62,9 @@ export class LeaflineApp {
   private loadingTask: ReturnType<typeof pdfjs.getDocument> | null = null;
   private docTask: ReturnType<typeof pdfjs.getDocument> | null = null;
   private busy = false;
+  private fitted: { preset: string; scale: number } | null = null;
+  /** Password of the open document, re-used when the document is reloaded after page operations. */
+  private password: string | null = null;
 
   constructor() {
     this.linkService = new PDFLinkService({ eventBus: this.eventBus, externalLinkTarget: LinkTarget.BLANK });
@@ -155,6 +158,8 @@ export class LeaflineApp {
       if (presetValue) {
         sel.value = presetValue;
         prefs.set("zoom", presetValue);
+      } else if (this.fitted && Math.abs(scale - this.fitted.scale) < 1e-6) {
+        sel.value = this.fitted.preset;
       } else {
         custom.textContent = `${Math.round(scale * 100)}%`;
         custom.hidden = false;
@@ -185,6 +190,7 @@ export class LeaflineApp {
     const data = new Uint8Array(await file.arrayBuffer());
     this.fileHandle = handle;
     this.history = [];
+    this.password = null;
     await this.load({ data }, file.name, {});
   }
 
@@ -192,6 +198,7 @@ export class LeaflineApp {
     if (!(await this.confirmDiscard())) return;
     this.fileHandle = null;
     this.history = [];
+    this.password = null;
     let name = "document.pdf";
     try { name = decodeURIComponent(new URL(url, location.href).pathname.split("/").pop() || name) || name; } catch { /* keep default */ }
     if (!/\.pdf$/i.test(name)) name += ".pdf";
@@ -213,11 +220,12 @@ export class LeaflineApp {
       wasmUrl: `${ASSETS}wasm/`,
       iccUrl: `${ASSETS}iccs/`,
       enableXfa: true,
+      password: this.password ?? undefined,
     });
     this.loadingTask = task;
     task.onPassword = (update: (pw: string) => void, reason: number) => {
       void askPassword(reason === pdfjs.PasswordResponses.INCORRECT_PASSWORD ? "Incorrect password. Try again." : "This document is encrypted. Enter the password to open it.")
-        .then((pw) => { if (pw === null) task.destroy(); else update(pw); });
+        .then((pw) => { if (pw === null) task.destroy(); else { this.password = pw; update(pw); } });
     };
     task.onProgress = ({ loaded, total }: { loaded: number; total: number }) => {
       if (total) this.setLoading(true, `Loading… ${Math.round((loaded / total) * 100)}%`);
@@ -340,7 +348,7 @@ export class LeaflineApp {
       toast(`${label}. Click here or press Ctrl+Z to undo.`, "success", 10000).onclick = () => void this.undoPageOp();
     } catch (err) {
       console.error(err);
-      toast(`${label} failed: ${(err as Error).message}`, "error", 6000);
+      toast(`Page change failed: ${(err as Error).message}`, "error", 6000);
     } finally {
       this.busy = false;
       this.setLoading(false);
@@ -498,7 +506,14 @@ export class LeaflineApp {
     let maxW = 0;
     for (let i = 0; i < v.pagesCount; i++) maxW = Math.max(maxW, (v.getPageView(i) as { width: number }).width);
     const available = this.container.clientWidth - 16;
-    if (maxW > available) v.currentScaleValue = String(v.currentScale * available / maxW);
+    if (maxW > available) {
+      const preset = v.currentScaleValue;
+      const scale = v.currentScale * available / maxW;
+      this.fitted = { preset, scale };
+      v.currentScaleValue = String(scale);
+      $<HTMLSelectElement>("zoomSelect").value = preset;
+      prefs.set("zoom", preset);
+    }
   }
 
   private rotate(delta: number): void {
