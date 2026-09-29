@@ -181,6 +181,14 @@ Chromium via Playwright, dev server, `long.pdf` (60 pages).
 - Single-page scroll mode: Space advances one page per press (1 → 3 after two presses), Shift+Space goes back one page (→ 2).
 - No defects found; no code changes.
 
+## 2026-09-29 — thirtieth session (opening a non-PDF file)
+
+Chromium via Playwright, dev server, `welcome.pdf` open; a text file injected into the hidden file input (the native picker cannot be driven headlessly).
+
+- Toast "Could not open "notes.txt": Invalid PDF structure." appears; the current document stays loaded (7 pages, title unchanged), loading overlay hidden, app not busy.
+- Console shows only PDF.js's own InvalidPDFException and an "Indexing all PDF objects" warning, both expected.
+- No defects found; no code changes.
+
 ## Open issues / follow-ups
 
 - Switching documents very quickly logs a benign "Transport destroyed" console error from the previous viewer initialization.
