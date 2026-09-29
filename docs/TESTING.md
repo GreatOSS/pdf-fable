@@ -105,8 +105,11 @@ User-research note: recurring wishes for browser PDF tools are consistent annota
 
 - Odd spreads on the arXiv paper: pages paired 1–2, 3–4, 5–6; Automatic zoom fits both pages side by side without horizontal overflow; preference persists.
 
+## 2026-09-29 — sixteenth session (resize position)
+
+- Resizing the window keeps the reading position: with page 2 scrolled 17% into view, shrinking to 1000px and restoring to 1280px kept the same fraction (0.170 → 0.177 → 0.170). The earlier "resize resets scroll position" note was wrong and is retired.
+
 Open issues / follow-ups:
-- Resizing the window resets the scroll position to the top of the current page.
 - Switching documents very quickly logs a benign "Transport destroyed" console error from the previous viewer initialization.
 - The delete icon of the PDF.js floating editor toolbar renders detached below its button in this build; the button itself works. Investigate CSS nesting/mask rules.
 - Printing was not exercised in the headless browser.
