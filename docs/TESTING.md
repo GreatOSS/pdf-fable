@@ -655,6 +655,14 @@ Built `dist/` and drove the static bundle on port 4173, since all recent session
 - **False alarm resolved:** the first run appeared to lose the note (bytes identical to the original). Cause: after a find jump the top of page 1 was 112 px above the viewport, so a click at "page top + 200 px" hit the editor bar rather than the page. Clicking inside the visible page region creates and saves the note. Not a product problem; caveat recorded for future sessions.
 - Note: `dist/` ships a 3.6 MB source map alongside the bundle; acceptable for a self-hosted private deployment.
 
+### Ninety-first session (touch: pinch zoom, single-finger events)
+
+Synthetic touch pointer events on the 60-page document at an 800 × 900 viewport.
+
+- **Pinch out** (finger distance 200 → 400 px) takes the scale from 0.668 to 1.302 and scrolls toward the pinch midpoint; **pinch in** (400 → 200 px) returns to 0.651. The zoom box shows "custom" afterwards and pointer moves during the pinch are default-prevented.
+- **Single finger:** a one-finger drag dispatches without errors; real scrolling is native (`touch-action: pan-x pan-y`), which synthetic events cannot exercise.
+- No console errors. Real-device behaviour (two-finger pan jitter during a pinch, momentum) remains on the untested list.
+
 ## Open issues / follow-ups
 
 - Encrypted documents cannot have their password removed; merge/extract/split are refused on them (pdf-lib cannot re-encrypt).
