@@ -166,6 +166,13 @@ Chromium via Playwright, dev server, `welcome.pdf`.
 - "Reading" gives "1 of 2 matches" and jumps to page 2; Enter → "2 of 2 matches"; Enter again wraps to "1 of 2 matches (wrapped)"; Shift+Enter wraps backwards to "2 of 2 matches (wrapped)".
 - No defects found; no code changes.
 
+## 2026-09-29 — twenty-eighth session (open from URL, success path)
+
+Chromium via Playwright, dev server, welcome screen.
+
+- Menu → Open from URL, paste `http://localhost:5173/samples/second.pdf`, Enter: dialog closes, document loads (title "Second document", 3 pages, page 1), no error toast, file name derived from the URL as `second.pdf` for later downloads.
+- No defects found; no code changes.
+
 ## Open issues / follow-ups
 
 - Switching documents very quickly logs a benign "Transport destroyed" console error from the previous viewer initialization.
