@@ -161,6 +161,8 @@ export class LeaflineApp {
     });
     // Real page sizes arrive after pagesinit (placeholders use the first page's size until then).
     bus.on("pagesloaded", () => this.fitWidestPage());
+    // Rotated pages change their widths, so presets must be re-fitted.
+    bus.on("rotationchanging", () => setTimeout(() => this.refitPreset(), 0));
     bus.on("pagechanging", ({ pageNumber }: { pageNumber: number }) => {
       $<HTMLInputElement>("pageInput").value = String(pageNumber);
       this.thumbs.setCurrent(pageNumber - 1);
