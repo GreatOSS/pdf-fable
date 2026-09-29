@@ -384,6 +384,13 @@ Chromium via Playwright, dev server, `welcome.pdf` (A4 portrait with a landscape
 - Found and fixed: the print container declared a single portrait `@page` size taken from page 1, so the two landscape pages (11.7 in wide) would have been clipped on 8.3 in sheets. The print pipeline now emits one CSS named page per distinct sheet size and assigns each page wrapper its `page` name (the unnamed rule keeps the first size as a fallback for browsers without named-page support).
 - Verified with Chromium's own print-to-PDF of the populated print container: 7 sheets, sheets 5 and 7 are 11.69×8.26 in landscape, the others 8.26×11.69 in portrait.
 
+## 2026-09-29 — fifty-seventh session (print regression on a uniform Letter document)
+
+Chromium via Playwright, dev server, `arxiv.pdf` (15 pages, US Letter), real print-to-PDF of the populated print container.
+
+- CI green on the mixed-size print fix. Print preparation took 1.7 s at 150 DPI; one `@page` size (8.5×11 in) plus one named page; print-to-PDF yields 15 Letter sheets with one page image each (4.6 MB).
+- No defects found; no code changes.
+
 ## Open issues / follow-ups
 
 - Switching documents very quickly logs a benign "Transport destroyed" console error from the previous viewer initialization.
