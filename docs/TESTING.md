@@ -602,6 +602,15 @@ On the arXiv paper: opened Document properties, switched to the dark theme, inve
 - **Highlight under inversion:** a highlight on the title renders as yellow text on the dark page (multiply blend over inverted pixels), fully legible; the same as Firefox's viewer. Left as-is.
 - No console errors. No product problems found.
 
+### Eighty-fifth session (insert blank page, extract pages, undo)
+
+On the welcome document from the sidebar, as a reader assembling a hand-out.
+
+- **Blank page:** with page 5 (landscape) current, "Blank page" inserted page 6 with the same landscape size, jumped to it, showed the undo toast and set the dirty dot. Saved bytes: 8 pages, page 6 has no content stream and no text.
+- **Extract:** selected pages 2, 5 and 8 and clicked Extract. The download (captured by hooking the anchor click) is `welcome-pages.pdf`, 3 pages in the selected order with the right sizes (A4, landscape A4, A4) and text, unencrypted. The open document is untouched (still 8 pages, selection kept) and the toast reads "Extracted 3 page(s) to a new PDF".
+- **Undo:** Ctrl+Z removed the blank page (7 pages) and cleared the dirty flag, since that was the only change.
+- No console errors. No product problems found.
+
 ## Open issues / follow-ups
 
 - Encrypted documents cannot have their password removed; merge/extract/split are refused on them (pdf-lib cannot re-encrypt).
