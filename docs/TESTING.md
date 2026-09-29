@@ -86,6 +86,12 @@ User-research note: recurring wishes for browser PDF tools are consistent annota
 - Insert blank page (7→8, sized like its neighbour), merge `second.pdf` through the file chooser (8→11), rotate selected page 1 (landscape in view and thumbnail); three undo entries; no console errors.
 - Found and fixed: page operations restored the numeric fitted scale instead of the zoom preset, and toggling the sidebar did not re-fit, both leaving a horizontal scrollbar. Presets are now preserved across page operations and re-applied on sidebar toggle (verified scrollWidth equals clientWidth in both states).
 
+## 2026-09-29 — twelfth session (extract, pan tool)
+
+- Extract selected pages: downloads `<name>-pages.pdf`; the file reopens with pypdf (1 page, title "… (extract)", correct content).
+- Pan tool: dragging 400px scrolls the document by 400px and selects no text.
+- Automation caveat (not an app bug): the Playwright MCP connection drops when its own `locator.click()` triggers a browser download; trigger downloads from page script or the keyboard in automated tests.
+
 Open issues / follow-ups:
 - Resizing the window resets the scroll position to the top of the current page.
 - Switching documents very quickly logs a benign "Transport destroyed" console error from the previous viewer initialization.
