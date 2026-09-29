@@ -206,6 +206,14 @@ Chromium via Playwright, dev server, `welcome.pdf` page 7 (stored with /Rotate 9
 - Bug found and fixed: with the sidebar open the landscape pages left a 1 px horizontal scrollbar. The widest-page fit allowed 16 px but PDF.js pages carry a 9 px transparent border per side. Allowance is now 20 px and the computed scale is floored to 3 decimals. Verified overflow 0 with the sidebar open and closed.
 - Note (PDF.js behaviour, not changed): the Automatic preset is computed from the current page, so re-fitting while a landscape page is current yields a smaller scale than when a portrait page is current.
 
+## 2026-09-29 — thirty-third session (fit regression check at 420px)
+
+Chromium via Playwright, dev server, `welcome.pdf` at 420×800 after the 20 px fit allowance change.
+
+- CI green on the fit fix. At 420 px the widest-page fit gives scale 0.342, landscape pages 383 px wide in a 405 px container, overflow 0; portrait pages 271 px. Landscape table and form pages render correctly.
+- Two-row toolbar: rightmost buttons (save on row 2, menu on row 1) end at 414 px, aligned and unclipped; no document-level horizontal scroll.
+- No defects found; no code changes.
+
 ## Open issues / follow-ups
 
 - Switching documents very quickly logs a benign "Transport destroyed" console error from the previous viewer initialization.
