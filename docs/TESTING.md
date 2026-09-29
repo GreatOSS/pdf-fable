@@ -445,6 +445,13 @@ Chromium via Playwright, dev server, `welcome.pdf`.
 
 - Found and fixed: opening the menu with the keyboard left focus on the button and arrow keys did nothing, forcing keyboard users to Tab through every item. The menu now follows the standard pattern: keyboard opening focuses the first item ("Open PDF…"), ArrowDown/ArrowUp cycle with wrap-around, Home/End jump to the ends, Enter activates (reached "Keyboard shortcuts" and opened the dialog), Escape closes and returns focus to the menu button, Tab closes. Mouse opening does not move focus.
 
+## 2026-09-29 — sixty-sixth session (sidebar tabs and tool group keyboard patterns)
+
+Chromium via Playwright, dev server, `welcome.pdf`.
+
+- CI green on the menu fix. Found and fixed: the sidebar tabs (role tab) ignored arrow keys, and the tool group was labelled a radio group while its buttons are `aria-pressed` toggles. Left/Right now move between and activate the sidebar tabs (with wrap-around, without leaking to page navigation) and step through the tools (select → hand → highlight…, wrapping to the image tool without opening its file chooser); the group role is now "group".
+- Verified: ArrowRight from Pages shows the Outline panel and focuses its tab; from the select tool ArrowRight twice selects the highlight tool with the right `aria-pressed` state; the current page stays 1 throughout.
+
 ## Open issues / follow-ups
 
 - Encrypted documents cannot have their password removed; merge/extract/split are refused on them (pdf-lib cannot re-encrypt).

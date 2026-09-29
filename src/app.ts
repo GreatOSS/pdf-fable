@@ -479,6 +479,17 @@ export class LeaflineApp {
       if (v !== "custom") { this.viewer.currentScaleValue = v; this.fitWidestPage(); }
       this.container.focus();
     };
+    document.querySelector<HTMLElement>(".tools")!.addEventListener("keydown", (e) => {
+      if (e.key !== "ArrowLeft" && e.key !== "ArrowRight") return;
+      const tools = [...document.querySelectorAll<HTMLButtonElement>(".tool")].filter((b) => b.offsetParent !== null);
+      const i = tools.indexOf(document.activeElement as HTMLButtonElement);
+      if (i < 0) return;
+      e.preventDefault();
+      e.stopPropagation();
+      const next = tools[(i + (e.key === "ArrowRight" ? 1 : -1) + tools.length) % tools.length];
+      next.focus();
+      if (next.dataset.tool !== "stamp") next.click();
+    });
     document.querySelectorAll<HTMLButtonElement>(".tool").forEach((b) => {
       b.onclick = () => {
         const t = b.dataset.tool as Tool;
@@ -698,6 +709,16 @@ export class LeaflineApp {
         $("panelPages").hidden = tab.dataset.panel !== "pages";
         $("panelOutline").hidden = tab.dataset.panel !== "outline";
         if (tab.dataset.panel === "pages") this.thumbs.setCurrent(this.viewer.currentPageNumber - 1);
+      };
+      // ARIA tabs pattern: Left/Right arrows move to (and activate) the neighbouring tab.
+      tab.onkeydown = (e) => {
+        if (e.key !== "ArrowLeft" && e.key !== "ArrowRight") return;
+        const tabs = [...document.querySelectorAll<HTMLButtonElement>(".sidebar-tab")];
+        const next = tabs[(tabs.indexOf(tab) + (e.key === "ArrowRight" ? 1 : -1) + tabs.length) % tabs.length];
+        e.preventDefault();
+        e.stopPropagation();
+        next.focus();
+        next.click();
       };
     });
     const sel = () => this.thumbs.selection;
