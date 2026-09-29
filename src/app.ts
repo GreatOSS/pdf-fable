@@ -170,7 +170,7 @@ export class LeaflineApp {
       const custom = sel.querySelector<HTMLOptionElement>('option[value="custom"]')!;
       if (presetValue) {
         sel.value = presetValue;
-        prefs.set("zoom", presetValue);
+        if (!this.app.classList.contains("presentation")) prefs.set("zoom", presetValue);
       } else if (this.fitted && Math.abs(scale - this.fitted.scale) < 1e-6) {
         sel.value = this.fitted.preset;
       } else {
@@ -796,14 +796,16 @@ export class LeaflineApp {
   private async presentation(): Promise<void> {
     if (!this.pdf) return;
     const wrap = $("viewerWrap");
-    const prev = { scroll: this.viewer.scrollMode, spread: this.viewer.spreadMode, scale: this.viewer.currentScaleValue };
+    const prev = { scroll: this.viewer.scrollMode, spread: this.viewer.spreadMode, scale: this.fitted?.preset ?? this.viewer.currentScaleValue };
     const onChange = () => {
       if (document.fullscreenElement === wrap) return;
       document.removeEventListener("fullscreenchange", onChange);
       this.app.classList.remove("presentation");
       this.viewer.scrollMode = prev.scroll;
       this.viewer.spreadMode = prev.spread;
+      this.fitted = null;
       this.viewer.currentScaleValue = prev.scale;
+      this.fitWidestPage();
     };
     try {
       await wrap.requestFullscreen();
@@ -811,6 +813,7 @@ export class LeaflineApp {
       document.addEventListener("fullscreenchange", onChange);
       this.viewer.scrollMode = ScrollMode.PAGE;
       this.viewer.spreadMode = SpreadMode.NONE;
+      this.fitted = null;
       this.viewer.currentScaleValue = "page-fit";
       this.container.focus();
     } catch (err) {
@@ -869,6 +872,7 @@ export class LeaflineApp {
       }
       if (e.key === "Escape") {
         if (!$("menu").hidden) { $("menu").hidden = true; return; }
+        if (this.app.classList.contains("presentation") && document.fullscreenElement) { void document.exitFullscreen(); return; }
         if (!$("findbar").hidden && (typing || t === this.container)) { this.toggleFind(false); return; }
         if (TOOL_MODE[this.tool] !== EditorType.NONE && !this.uiManager?.hasSelection) { this.setTool("select"); return; }
         if (this.tool === "hand") { this.setTool("select"); }

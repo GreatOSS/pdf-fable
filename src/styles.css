@@ -201,7 +201,10 @@ li.collapsed > .outline-list { display: none; }
 
 /* Presentation mode */
 .app.presentation .toolbar, .app.presentation .sidebar, .app.presentation .editor-bar, .app.presentation .findbar { display: none; }
-.app.presentation .viewer-container { background: #000; }
+.app.presentation .viewer-container { background: #000; scrollbar-width: none; }
+.app.presentation .viewer-container::-webkit-scrollbar { display: none; }
+.app.presentation .viewer-container .pdfViewer { padding: 0; }
+.app.presentation .pdfViewer .page { margin: 0 auto; box-shadow: none; }
 
 /* Print */
 #printContainer { display: none; }
