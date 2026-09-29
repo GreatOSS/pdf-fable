@@ -131,7 +131,8 @@ a { color: var(--accent); }
 li.collapsed > .outline-list { display: none; }
 
 .viewer-wrap { position: relative; flex: 1; min-width: 0; }
-.viewer-container { position: absolute; inset: 0; overflow: auto; outline: none; background: var(--bg); }
+.viewer-container { position: absolute; inset: 0; overflow: auto; outline: none; background: var(--bg); touch-action: pan-x pan-y; }
+.viewer-container.pinching { overflow: hidden; }
 .viewer-container.hand { cursor: grab; }
 .viewer-container.hand.panning { cursor: grabbing; }
 .viewer-container.hand .textLayer { pointer-events: none; }

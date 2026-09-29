@@ -477,18 +477,54 @@ export class LeaflineApp {
     this.container.addEventListener("wheel", (e) => {
       if (!(e.ctrlKey || e.metaKey) || !this.pdf) return;
       e.preventDefault();
-      const rect = this.container.getBoundingClientRect();
-      const x = e.clientX - rect.left, y = e.clientY - rect.top;
-      const oldScale = this.viewer.currentScale;
       const steps = e.deltaMode === 0 ? -e.deltaY / 100 : -Math.sign(e.deltaY);
-      const newScale = Math.max(0.1, Math.min(10, oldScale * Math.pow(1.1, steps)));
-      if (Math.abs(newScale - oldScale) < 0.001) return;
-      const sl = this.container.scrollLeft, st = this.container.scrollTop;
-      this.viewer.currentScaleValue = String(newScale);
-      const r = newScale / oldScale;
-      this.container.scrollLeft = (sl + x) * r - x;
-      this.container.scrollTop = (st + y) * r - y;
+      this.zoomAt(this.viewer.currentScale * Math.pow(1.1, steps), e.clientX, e.clientY);
     }, { passive: false });
+    this.bindPinchZoom();
+  }
+
+  /** Sets an absolute scale while keeping the document point under (clientX, clientY) fixed. */
+  private zoomAt(scale: number, clientX: number, clientY: number): void {
+    const rect = this.container.getBoundingClientRect();
+    const x = clientX - rect.left, y = clientY - rect.top;
+    const oldScale = this.viewer.currentScale;
+    const newScale = Math.max(0.1, Math.min(10, scale));
+    if (Math.abs(newScale - oldScale) < 0.001) return;
+    const sl = this.container.scrollLeft, st = this.container.scrollTop;
+    this.viewer.currentScaleValue = String(newScale);
+    const r = newScale / oldScale;
+    this.container.scrollLeft = (sl + x) * r - x;
+    this.container.scrollTop = (st + y) * r - y;
+  }
+
+  /** Two-finger pinch zoom on touch screens (pointer events; browser pinch is disabled via touch-action). */
+  private bindPinchZoom(): void {
+    const c = this.container;
+    const pts = new Map<number, { x: number; y: number }>();
+    let start: { dist: number; scale: number } | null = null;
+    let pending: number | null = null;
+    const dist = () => { const [a, b] = [...pts.values()]; return Math.hypot(a.x - b.x, a.y - b.y); };
+    c.addEventListener("pointerdown", (e) => {
+      if (e.pointerType !== "touch") return;
+      pts.set(e.pointerId, { x: e.clientX, y: e.clientY });
+      if (pts.size === 2) { start = { dist: dist(), scale: this.viewer.currentScale }; this.container.classList.add("pinching"); }
+    });
+    c.addEventListener("pointermove", (e) => {
+      if (e.pointerType !== "touch" || !pts.has(e.pointerId)) return;
+      pts.set(e.pointerId, { x: e.clientX, y: e.clientY });
+      if (pts.size !== 2 || !start || !this.pdf) return;
+      e.preventDefault();
+      const [a, b] = [...pts.values()];
+      const target = start.scale * dist() / start.dist;
+      // Coalesce to one zoom per frame; re-scaling the viewer is expensive.
+      if (pending === null) pending = requestAnimationFrame(() => { pending = null; this.zoomAt(target, (a.x + b.x) / 2, (a.y + b.y) / 2); });
+    }, { passive: false });
+    const end = (e: PointerEvent) => {
+      pts.delete(e.pointerId);
+      if (pts.size < 2) { start = null; this.container.classList.remove("pinching"); }
+    };
+    c.addEventListener("pointerup", end);
+    c.addEventListener("pointercancel", end);
   }
 
   private async pickFile(): Promise<void> {
