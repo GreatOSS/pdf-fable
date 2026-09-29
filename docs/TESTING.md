@@ -479,6 +479,13 @@ Chromium via Playwright, dev server, `welcome.pdf`.
 - CI green on the outline toggle fix. Toasts and the find status are polite live regions; the page number input is labelled; keyboard focus shows a visible ring (`:focus-visible`) on toolbar controls and the text layer.
 - Added: the loading overlay is now `role="status" aria-live="polite"`, so "Loading…", load percentages and "Preparing to print… n/t" are announced.
 
+## 2026-09-29 — seventy-first session (colour contrast)
+
+Chromium via Playwright, dev server, `welcome.pdf`, computed WCAG contrast ratios from live styles.
+
+- Light theme: toolbar icons/brand/select 16.8:1, muted hint text, inactive tab and thumbnail numbers 4.9:1, active tab 4.8:1, find "Phrase not found" red 5.0:1. Dark theme: icons 12.7:1, muted text 5.7:1, active tab 6.8:1, not-found red 6.0:1. All pairs meet WCAG AA (≥ 4.5:1) for normal text.
+- No defects found; no code changes.
+
 ## Open issues / follow-ups
 
 - Encrypted documents cannot have their password removed; merge/extract/split are refused on them (pdf-lib cannot re-encrypt).
