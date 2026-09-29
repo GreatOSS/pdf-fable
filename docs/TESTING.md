@@ -486,6 +486,13 @@ Chromium via Playwright, dev server, `welcome.pdf`, computed WCAG contrast ratio
 - Light theme: toolbar icons/brand/select 16.8:1, muted hint text, inactive tab and thumbnail numbers 4.9:1, active tab 4.8:1, find "Phrase not found" red 5.0:1. Dark theme: icons 12.7:1, muted text 5.7:1, active tab 6.8:1, not-found red 6.0:1. All pairs meet WCAG AA (≥ 4.5:1) for normal text.
 - No defects found; no code changes.
 
+### Seventy-second session (forced colours / Windows High Contrast)
+
+Emulated `forced-colors: active` on welcome.pdf with the sidebar open and page 2 selected.
+
+- **Bug:** the active tool button, the selected sidebar tab, the selected thumbnail and the current-page thumbnail all lost their tinted backgrounds, so none of these states were distinguishable. Fixed with a `@media (forced-colors: active)` block in `src/styles.css`: active tools and swatches get a `Highlight` outline, the selected tab and checked menu items are underlined, selected thumbnails get a 3px `Highlight` outline, the current thumbnail a 4px border, and toasts a `CanvasText` border.
+- Verified after the fix: computed styles differ for active vs inactive tool (2px outline vs none), selected vs current thumbnail (outline vs 4px border), and the active tab is underlined. Screenshot confirms the toolbar shows the select tool as active. Normal mode unaffected.
+
 ## Open issues / follow-ups
 
 - Encrypted documents cannot have their password removed; merge/extract/split are refused on them (pdf-lib cannot re-encrypt).

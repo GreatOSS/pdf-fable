@@ -245,3 +245,15 @@ li.collapsed > .outline-list { display: none; }
   /* Still available from the menu and keyboard. */
   #zoomSelect, #btnPrint, #btnRotate, .tools .sep { display: none; }
 }
+
+/* Windows High Contrast / forced colours: tints are stripped, so express states with outlines,
+   border weight and underlines using system colours. */
+@media (forced-colors: active) {
+  .tb[aria-pressed="true"], .tb.active { outline: 2px solid Highlight; outline-offset: -2px; }
+  .sidebar-tab[aria-selected="true"] { text-decoration: underline; text-decoration-thickness: 2px; }
+  .thumb.selected { outline: 3px solid Highlight; outline-offset: 1px; }
+  .thumb.current { border-width: 4px; }
+  .swatch.active { outline: 2px solid Highlight; outline-offset: 2px; }
+  [role="menuitemradio"][aria-checked="true"], [role="menuitemcheckbox"][aria-checked="true"] { text-decoration: underline; }
+  .toast { border: 1px solid CanvasText; }
+}
