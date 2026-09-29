@@ -356,6 +356,14 @@ Chromium via Playwright, dev server, `welcome.pdf`, view rotated 90° with `r` (
 - Stroke drawn at 20–41 % across / 30–39 % down the rotated view: saved `/Ink` Rect [167 157 224 331] is inside the unrotated 595×842 page, at 28–38 % across and 61–81 % down, which is the correct 90° mapping; the annotation records `/Rotate 90`. After `R` rotates the view back the editor stays on page 1 at 29 % / 62 %.
 - No defects found; no code changes.
 
+## 2026-09-29 — fifty-third session (annotations in print output)
+
+Chromium via Playwright, dev server, `second.pdf` (A5); `window.print` stubbed to sample the rasterised pages.
+
+- Red 20 px ink stroke across the middle of page 1, then Ctrl+P: the print container holds 3 page images at 150 DPI (874×1240) with `@page { size: 5.83in 8.27in }`; the row through the stroke contains 362 red pixels (≈40 % of the width, matching the drawn span) and a control row none. Unsaved annotations therefore print.
+- Console: PDF.js "AnnotationBorderStyle.setWidth - ignoring width: 20" while loading the print copy, because the border width exceeds half the annotation's own rectangle; the stroke is drawn from its appearance stream, so this is benign.
+- No defects found; no code changes.
+
 ## Open issues / follow-ups
 
 - Switching documents very quickly logs a benign "Transport destroyed" console error from the previous viewer initialization.
