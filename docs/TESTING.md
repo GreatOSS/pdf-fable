@@ -620,6 +620,15 @@ On the arXiv paper as a reader following citations and copying text.
 - **Rough edge fixed:** Ctrl+A selected the entire interface (sidebar labels, buttons) along with the document, so a paste carried UI text. Ctrl+A now selects only the rendered pages' text layers (7,113 characters here, starting with the first line of page 1 and ending on page 2, with no sidebar text). Inside the find box and a text annotation editor Ctrl+A still selects that field's own content.
 - No console errors.
 
+### Eighty-seventh session (find bar options and the rotated page)
+
+Searched the welcome document with every find option, cross-checked against pypdf counts.
+
+- **Counts:** "the" 26 matches; Match case 25; "The" with case 1 (page 4); Whole words 19; "rotate" 4. All identical to pypdf's regex counts.
+- **Behaviour:** Ctrl+F focuses the box; Enter/Shift+Enter walk forward and back with "(wrapped)" shown at the ends; Highlight all off leaves only the current match highlighted; Close clears all highlights and returns focus to the viewer; reopening restores the query, selected, with its status.
+- **Rotated page:** the "Rotate" match on the /Rotate 90 page is highlighted as a vertical 23 × 58 px box inside the page and scrolled into view.
+- No console errors. No product problems found.
+
 ## Open issues / follow-ups
 
 - Encrypted documents cannot have their password removed; merge/extract/split are refused on them (pdf-lib cannot re-encrypt).
