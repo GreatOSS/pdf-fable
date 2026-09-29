@@ -636,6 +636,16 @@ The find highlight on the /Rotate 90 page looked one line to the right of its gl
 - **Root cause:** the global `* { box-sizing: border-box }` reset applied to PDF.js's `.page`, which PDF.js designs as content-box with a 9 px transparent border. The canvas shrank to the 692 px content box while PDF.js sized the text and annotation layers to the page's 710 px width, so all overlay layers were 18 px too large in each direction (selection, find highlights, link hit areas and form widgets all drifted; up to a full line on the rotated page).
 - **Fix:** `.pdfViewer .page { box-sizing: content-box }`. Verified: canvas, text layer and annotation layer now share identical boxes on the portrait page (710 × 1004) and the rotated page (1004 × 710); the rotated highlight covers "Rota" exactly and "Form fields" shows a single crisp outline. Automatic fit still has no horizontal overflow at 1280 px, at 420 px, with odd spreads, and at page-width on the 60-page document.
 
+### Eighty-ninth session (regression pass after the page box-sizing fix)
+
+Re-checked everything that depends on page geometry after restoring content-box pages.
+
+- **Annotation placement:** a text note clicked at the page centre sits at 49.4 % / 48.1 % of the page in the editor and saves at 50 % / 48.5 % of the media box (pypdf), so editor and file agree.
+- **Ctrl+wheel zoom anchoring:** at 1.6× with horizontal overflow, zooming in to 1.94× and back keeps the document point under the cursor within 0.3 % of the page in both axes. (At zooms where the page still fits the container width the page is centred, so horizontal anchoring cannot apply; that is by design.)
+- **Thumbnails:** 7 thumbnails at the A4 ratio (0.708). **Print:** 7 page images, 1240 × 1753 for A4 and 1753 × 1240 for the landscape page, with matching named `@page` sizes.
+- **Fit:** no horizontal overflow at Automatic on 1280 px or 420 px, with odd spreads, or at page-width on the 60-page document (checked in the previous session).
+- No console errors. No regressions found.
+
 ## Open issues / follow-ups
 
 - Encrypted documents cannot have their password removed; merge/extract/split are refused on them (pdf-lib cannot re-encrypt).
