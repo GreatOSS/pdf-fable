@@ -320,6 +320,14 @@ Chromium via Playwright, dev server, `welcome.pdf`.
 - CI green on the ink-opacity fix. Text tool with colour #0000ff and size 24: the editor renders blue at 28.6 px (24 pt × 1.19 zoom) and the saved `/FreeText` has `/DA (/Helv 24 Tf 0 0 1 rg)` with the typed text present. Size slider range 6–48 needs no scaling, unlike ink opacity.
 - No defects found; no code changes.
 
+## 2026-09-29 — forty-eighth session (highlight colour swatches and free-highlight thickness)
+
+Chromium via Playwright, dev server, `welcome.pdf`.
+
+- Highlight tool, blue swatch (#80EBFF), thickness 20: dragging across a text line saves a `/Highlight` with `/C [0.502 0.922 1]`; dragging over empty space saves a free highlight as `/Ink` with the same colour and `/BS << /W 20 >>`. Two entries in annotation storage, no console errors.
+- All editor parameters (highlight colour/thickness, text colour/size, ink colour/thickness/opacity) are now verified against saved bytes.
+- No defects found; no code changes.
+
 ## Open issues / follow-ups
 
 - Switching documents very quickly logs a benign "Transport destroyed" console error from the previous viewer initialization.
