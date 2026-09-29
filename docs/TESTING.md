@@ -335,6 +335,13 @@ Chromium via Playwright, dev server, `welcome.pdf`.
 - A text highlight was saved, the saved bytes reloaded as a new document (highlight rendered by the annotation layer), the highlight tool selected, the existing highlight clicked and removed with Delete. The next save writes page 1 with an empty `/Annots` array; pypdf confirms no highlight remains on any page (7 pages intact).
 - No defects found; no code changes.
 
+## 2026-09-29 — fiftieth session (dragging an annotation)
+
+Chromium via Playwright, dev server, `welcome.pdf` at zoom 1.19.
+
+- A text note dragged 149 px right and 80 px up: the saved `/Rect` moves from [162 441 219 464] to [288 508 345 531], i.e. +126 pt x and +67 pt y, matching the screen delta ÷ 1.19 with the PDF y-axis inverted. No console errors (one benign "Helv" font warning).
+- No defects found; no code changes.
+
 ## Open issues / follow-ups
 
 - Switching documents very quickly logs a benign "Transport destroyed" console error from the previous viewer initialization.
