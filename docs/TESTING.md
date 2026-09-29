@@ -458,6 +458,13 @@ Chromium via Playwright, dev server, `arxiv.pdf`.
 
 - CI green on the tabs/tools keyboard fix. Dialogs are modal and open with focus inside (Properties focuses Close). Found and fixed: closing a dialog left focus on the document body. Dialogs now return focus to the element that opened them, and activating a menu item from the keyboard first returns focus to the menu button so the dialog has a live opener. Verified: Properties via keyboard menu → Escape → focus on the menu button; "?" from the viewer → Escape → focus back on the viewer; About via mouse → Escape → focus on the menu button.
 
+## 2026-09-29 — sixty-eighth session (thumbnail keyboard access and semantics)
+
+Chromium via Playwright, dev server, `welcome.pdf`.
+
+- CI green on the focus-return fix. Thumbnails are focusable list items: Space toggles selection ("1 selected", checkbox checked, focus retained), Enter jumps to the page (page 3) and moves focus to the viewer for immediate scrolling. Checkboxes are separately tabbable with "Select page N" labels.
+- Added: each thumbnail now has an accessible name ("Page N") and the current page carries `aria-current="page"` (verified: only thumbnail 3 after jumping there).
+
 ## Open issues / follow-ups
 
 - Encrypted documents cannot have their password removed; merge/extract/split are refused on them (pdf-lib cannot re-encrypt).

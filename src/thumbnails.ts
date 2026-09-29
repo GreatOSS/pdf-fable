@@ -63,6 +63,7 @@ export class Thumbnails {
       el.tabIndex = 0;
       el.draggable = true;
       el.title = `Page ${i + 1}`;
+      el.setAttribute("aria-label", `Page ${i + 1}`);
       el.innerHTML = `<div class="thumb-frame"><canvas></canvas></div><div class="thumb-foot"><input type="checkbox" class="thumb-check" aria-label="Select page ${i + 1}" /><span class="thumb-num">${i + 1}</span></div>`;
       el.addEventListener("click", (e) => this.onClick(i, e));
       el.addEventListener("keydown", (e) => {
@@ -94,7 +95,10 @@ export class Thumbnails {
 
   setCurrent(pageIndex: number): void {
     this.current = pageIndex;
-    this.items.forEach((el, i) => el.classList.toggle("current", i === pageIndex));
+    this.items.forEach((el, i) => {
+      el.classList.toggle("current", i === pageIndex);
+      if (i === pageIndex) el.setAttribute("aria-current", "page"); else el.removeAttribute("aria-current");
+    });
     const el = this.items[pageIndex];
     if (el && this.container.offsetParent) {
       const r = el.getBoundingClientRect();
