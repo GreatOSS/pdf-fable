@@ -110,11 +110,7 @@ export class LeaflineApp {
     $("aboutVersion").textContent = `v${VERSION}`;
     window.addEventListener("beforeunload", (e) => { if (this.dirty) { e.preventDefault(); } });
     // The viewer component does not re-fit presets ("auto", "page-width", ...) when the window resizes.
-    window.addEventListener("resize", debounce(() => {
-      if (!this.pdf) return;
-      const preset = this.fitted?.preset ?? this.viewer.currentScaleValue;
-      if (!/^\d/.test(preset)) { this.fitted = null; this.viewer.currentScaleValue = preset; this.fitWidestPage(); }
-    }, 120));
+    window.addEventListener("resize", debounce(() => this.refitPreset(), 120));
     const params = new URLSearchParams(location.search);
     const file = params.get("file");
     if (file) void this.openUrl(file);
@@ -139,7 +135,7 @@ export class LeaflineApp {
     $("btnSidebar").setAttribute("aria-pressed", String(open));
     prefs.set("sidebar", open);
     if (open && this.pdf) this.thumbs.setCurrent(this.viewer.currentPageNumber - 1);
-    if (this.pdf) this.viewer.update();
+    if (this.pdf) { this.viewer.update(); this.refitPreset(); }
   }
 
   private setInvert(on: boolean): void {
@@ -362,7 +358,7 @@ export class LeaflineApp {
       const out = await fn(before);
       this.history.push(snapshot);
       if (this.history.length > 10) this.history.shift();
-      await this.load({ data: out }, this.fileName, { page: page ?? this.viewer.currentPageNumber, scaleValue: this.viewer.currentScaleValue, dirty: true });
+      await this.load({ data: out }, this.fileName, { page: page ?? this.viewer.currentPageNumber, scaleValue: this.fitted?.preset ?? this.viewer.currentScaleValue, dirty: true });
       toast(`${label}. Click here or press Ctrl+Z to undo.`, "success", 10000).onclick = () => void this.undoPageOp();
     } catch (err) {
       console.error(err);
@@ -376,7 +372,7 @@ export class LeaflineApp {
   private async undoPageOp(): Promise<void> {
     const prev = this.history.pop();
     if (!prev || this.busy) return;
-    await this.load({ data: prev }, this.fileName, { page: this.viewer.currentPageNumber, scaleValue: this.viewer.currentScaleValue, dirty: true });
+    await this.load({ data: prev }, this.fileName, { page: this.viewer.currentPageNumber, scaleValue: this.fitted?.preset ?? this.viewer.currentScaleValue, dirty: true });
     toast("Page change undone", "info");
   }
 
@@ -549,6 +545,13 @@ export class LeaflineApp {
     let s = this.viewer.currentScale;
     s = direction > 0 ? Math.min(10, Math.ceil(s * 1.1 * 10) / 10) : Math.max(0.1, Math.floor((s / 1.1) * 10) / 10);
     this.viewer.currentScaleValue = String(s);
+  }
+
+  /** Re-applies the current zoom preset (if any) after the container width changed. */
+  private refitPreset(): void {
+    if (!this.pdf) return;
+    const preset = this.fitted?.preset ?? this.viewer.currentScaleValue;
+    if (!/^\d/.test(preset)) { this.fitted = null; this.viewer.currentScaleValue = preset; this.fitWidestPage(); }
   }
 
   /** For documents with mixed page sizes, "auto"/"page-width" fit the current page only (PDF.js
