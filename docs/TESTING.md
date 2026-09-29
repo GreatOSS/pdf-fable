@@ -663,6 +663,15 @@ Synthetic touch pointer events on the 60-page document at an 800 × 900 viewport
 - **Single finger:** a one-finger drag dispatches without errors; real scrolling is native (`touch-action: pan-x pan-y`), which synthetic events cannot exercise.
 - No console errors. Real-device behaviour (two-finger pan jitter during a pinch, momentum) remains on the untested list.
 
+### Ninety-second session (edit and delete a pre-existing text annotation)
+
+Created a note, saved and reopened the bytes as a new file, then edited and deleted the now pre-existing annotation.
+
+- **Reopen:** the note comes back as a FreeText annotation with its popup; entering the text tool turns it into an editor showing "first draft".
+- **Edit:** double-click, Ctrl+A, retype "second draft", click away. Saved bytes: exactly one FreeText, contents "second draft", appearance stream regenerated (no trace of "first draft").
+- **Delete:** selecting the editor and pressing Delete removes it, enables editor Undo and sets the dirty flag. Saved bytes: no annotations on page 1. The original section stays in the DOM only as PDF.js's hidden placeholder.
+- Only the benign "Helv" font-fallback warnings; no errors. Thumbnails keep the pre-edit rendering until the next reload (known).
+
 ## Open issues / follow-ups
 
 - Encrypted documents cannot have their password removed; merge/extract/split are refused on them (pdf-lib cannot re-encrypt).
