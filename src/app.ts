@@ -61,6 +61,8 @@ export class LeaflineApp {
   private thumbs: Thumbnails;
   private history: { bytes: Uint8Array; dirty: boolean }[] = [];
   private undoToast: ToastElement | null = null;
+  private outlineEntries: { page: number; link: HTMLButtonElement }[] = [];
+  private outlineCurrent: HTMLButtonElement | null = null;
   private undoneToast: ToastElement | null = null;
   private loadingTask: ReturnType<typeof pdfjs.getDocument> | null = null;
   private docTask: ReturnType<typeof pdfjs.getDocument> | null = null;
@@ -168,6 +170,7 @@ export class LeaflineApp {
     bus.on("pagechanging", ({ pageNumber }: { pageNumber: number }) => {
       $<HTMLInputElement>("pageInput").value = String(pageNumber);
       this.thumbs.setCurrent(pageNumber - 1);
+      this.markOutlinePage(pageNumber);
     });
     bus.on("scalechanging", ({ scale, presetValue }: { scale: number; presetValue?: string }) => {
       const sel = $<HTMLSelectElement>("zoomSelect");
@@ -762,11 +765,14 @@ export class LeaflineApp {
   private async loadOutline(pdf: PDFDocumentProxy): Promise<void> {
     const host = $("outline");
     host.innerHTML = "";
+    this.outlineEntries = [];
+    this.outlineCurrent = null;
     type Item = { title: string; dest: unknown; url?: string | null; items: Item[]; bold?: boolean; italic?: boolean };
     let outline: Item[] | null = null;
     try { outline = (await pdf.getOutline()) as Item[] | null; } catch { /* ignore */ }
     if (this.pdf !== pdf) return;
     if (!outline?.length) { host.innerHTML = '<div class="outline-empty">This document has no outline.</div>'; return; }
+    const links = new Map<Item, HTMLButtonElement>();
     const build = (items: Item[]): HTMLUListElement => {
       const ul = document.createElement("ul");
       ul.className = "outline-list";
@@ -788,10 +794,11 @@ export class LeaflineApp {
         const link = document.createElement("button");
         link.className = "outline-link" + (it.bold ? " bold" : "") + (it.italic ? " italic" : "");
         link.textContent = it.title || "(untitled)";
+        links.set(it, link);
         link.onclick = () => {
           if (it.url) { window.open(it.url, "_blank", "noopener"); return; }
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          if (it.dest) void this.linkService.goToDestination(it.dest as any);
+          if (it.dest) { this.setOutlineCurrent(link); void this.linkService.goToDestination(it.dest as any); }
         };
         row.append(tg, link);
         li.appendChild(row);
@@ -801,6 +808,41 @@ export class LeaflineApp {
       return ul;
     };
     host.appendChild(build(outline));
+    // Resolve each entry's page so the outline can follow the reader (see markOutlinePage).
+    const entries: { page: number; link: HTMLButtonElement }[] = [];
+    const walk = async (items: Item[]) => {
+      for (const it of items) {
+        try {
+          let dest = it.dest;
+          if (typeof dest === "string") dest = await pdf.getDestination(dest);
+          const ref = Array.isArray(dest) ? dest[0] : null;
+          if (ref && typeof ref === "object") entries.push({ page: (await pdf.getPageIndex(ref)) + 1, link: links.get(it)! });
+        } catch { /* broken destination: entry simply never becomes current */ }
+        if (it.items?.length) await walk(it.items);
+      }
+    };
+    await walk(outline);
+    if (this.pdf !== pdf) return;
+    this.outlineEntries = entries;
+    this.markOutlinePage(this.viewer.currentPageNumber);
+  }
+
+  /** Highlight the outline entry the reader is in: the last one starting on or before the page. */
+  private markOutlinePage(page: number): void {
+    let best: { page: number; link: HTMLButtonElement } | null = null;
+    for (const e of this.outlineEntries) if (e.page <= page) best = e;
+    // Several entries may start on the same page; keep the one the reader chose explicitly.
+    const cur = this.outlineEntries.find((e) => e.link === this.outlineCurrent);
+    if (cur && best && cur.page === best.page) return;
+    this.setOutlineCurrent(best?.link ?? null);
+  }
+
+  private setOutlineCurrent(link: HTMLButtonElement | null): void {
+    if (link === this.outlineCurrent) return;
+    this.outlineCurrent?.classList.remove("current");
+    this.outlineCurrent?.removeAttribute("aria-current");
+    this.outlineCurrent = link;
+    if (link) { link.classList.add("current"); link.setAttribute("aria-current", "true"); }
   }
 
   // ---------- Menu ----------

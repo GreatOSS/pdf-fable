@@ -500,6 +500,15 @@ Emulated `prefers-reduced-motion: reduce`, then a 640px viewport at 200% zoom (3
 - **Reflow:** the toolbar wraps onto four rows, nothing overflows horizontally (document width equals window width) and every control stays reachable. No change needed.
 - **Bug (minor):** the loading spinner kept its fast 0.8s continuous spin and toasts/thumbnail checkboxes kept their transitions under reduced motion. Added a `prefers-reduced-motion` block: spinner slows to a stepped 2.4s cycle, toast and checkbox transitions are disabled. Verified computed styles under both media states; normal mode unchanged.
 
+### Seventy-fourth session (real-world workflow on the arXiv paper)
+
+Opened the 15-page two-column "Attention Is All You Need" paper and worked through it as a reader.
+
+- **Find:** "multi-head attention" reports 8 matches, Enter walks them across pages 1 → 3, and a match that wraps across a line break is found. Escape closes the bar cleanly.
+- **Text note:** added "Reviewed 2026-09-29" on page 3 with the Add text tool, saved via `currentBytes()`; pypdf shows a FreeText annotation with the right contents and a valid /DA. No console errors.
+- **Outline:** all 22 entries navigate to the right page; collapse/expand works. Clicking "Attention" (which starts near the foot of page 3) leaves the page field on 4 because page 4 dominates the viewport, the same as Firefox's viewer; not changed.
+- **Gap found and fixed:** the outline never indicated where the reader currently is. Added current-section tracking: each entry's page is resolved after the outline is built, the last entry starting on or before the current page gets `.current` / `aria-current`, and an entry chosen by click stays current while the page still matches (several entries can share a page). Verified while scrolling, jumping between pages 2–15, clicking "Optimizer", and on a document with no outline (nothing marked, no errors). Forced-colours outline style included.
+
 ## Open issues / follow-ups
 
 - Encrypted documents cannot have their password removed; merge/extract/split are refused on them (pdf-lib cannot re-encrypt).
