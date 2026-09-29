@@ -472,6 +472,13 @@ Chromium via Playwright, dev server, `arxiv.pdf`.
 - CI green on the thumbnail semantics change. Audit: every visible button, input and select (plus the menu items) has an accessible name.
 - Found and fixed: outline expand/collapse toggles were labelled just "Toggle" with no state, and the 18 hidden leaf toggles were still in the tab order. Toggles now read "Collapse Model Architecture" / "Expand Model Architecture" with `aria-expanded`, and leaf toggles are `tabindex=-1` and aria-hidden (outline tab stops 44 → 26). Enter on a toggle collapses/expands; Tab then Enter on the entry jumps to page 3.
 
+## 2026-09-29 — seventieth session (live regions and focus rings)
+
+Chromium via Playwright, dev server, `welcome.pdf`.
+
+- CI green on the outline toggle fix. Toasts and the find status are polite live regions; the page number input is labelled; keyboard focus shows a visible ring (`:focus-visible`) on toolbar controls and the text layer.
+- Added: the loading overlay is now `role="status" aria-live="polite"`, so "Loading…", load percentages and "Preparing to print… n/t" are announced.
+
 ## Open issues / follow-ups
 
 - Encrypted documents cannot have their password removed; merge/extract/split are refused on them (pdf-lib cannot re-encrypt).
