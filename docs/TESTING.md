@@ -404,6 +404,13 @@ Chromium via Playwright, dev server, `welcome.pdf`, real print-to-PDF.
 - CI green on the print-rotation change. With the view unrotated, page 7 (stored /Rotate 90) still rasterises landscape (1753×1240) and its text sits in the right-hand strip of the sheet, matching the on-screen orientation; page 5 landscape, others portrait. The page's own rotation and the view rotation combine correctly.
 - No defects found; no code changes.
 
+## 2026-09-29 — sixtieth session (print progress and busy guard)
+
+Chromium via Playwright, dev server, `long.pdf` (60 pages).
+
+- Ctrl+P shows the loading overlay with live progress ("Preparing to print… 8/60", later 21/60) and marks the app busy; a second Ctrl+P during preparation is ignored (`window.print` called exactly once). Afterwards the overlay hides, the print container is cleared and the app is no longer busy.
+- No defects found; no code changes.
+
 ## Open issues / follow-ups
 
 - Switching documents very quickly logs a benign "Transport destroyed" console error from the previous viewer initialization.
