@@ -527,6 +527,14 @@ Merged the A5 `second.pdf` into the A4 welcome document through the Merge PDF pi
 - **Undo chain:** Ctrl+Z restored the original order (page 1 A4, page 8 A5); a second Ctrl+Z in an earlier run reverted the merge to 7 pages and cleared the dirty flag. Both steps showed a single "Page change undone" toast.
 - No product problems found.
 
+### Seventy-seventh session (form fill, page operation, save)
+
+Filled every field type on the welcome form page (text "Ada Lovelace", checkbox, "Dark" radio, "Deutsch" dropdown) as a user, then rotated page 1 from the sidebar, which reloads the document through the page-op pipeline.
+
+- All four values survived the reload and the dirty dot stayed on; the rotate toast offered undo as usual.
+- Saved bytes checked with pypdf: page 1 /Rotate 90, field values name/agree=/Yes/theme=/1/language=Deutsch, checkbox and radio /AS states correct, and the text and dropdown widgets carry fresh appearance streams containing the typed text, so viewers that do not regenerate appearances will show the values.
+- No console errors. No product problems found.
+
 ## Open issues / follow-ups
 
 - Encrypted documents cannot have their password removed; merge/extract/split are refused on them (pdf-lib cannot re-encrypt).
