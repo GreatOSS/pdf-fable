@@ -112,6 +112,13 @@ export class Thumbnails {
     this.syncSelection();
   }
 
+  /** Replace the selection (indexes outside the document are ignored). */
+  setSelection(indexes: number[]): void {
+    this.selected.clear();
+    for (const i of indexes) if (i >= 0 && i < this.items.length) this.selected.add(i);
+    this.syncSelection();
+  }
+
   selectAll(): void {
     this.items.forEach((_, i) => this.selected.add(i));
     this.syncSelection();

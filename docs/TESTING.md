@@ -509,6 +509,15 @@ Opened the 15-page two-column "Attention Is All You Need" paper and worked throu
 - **Outline:** all 22 entries navigate to the right page; collapse/expand works. Clicking "Attention" (which starts near the foot of page 3) leaves the page field on 4 because page 4 dominates the viewport, the same as Firefox's viewer; not changed.
 - **Gap found and fixed:** the outline never indicated where the reader currently is. Added current-section tracking: each entry's page is resolved after the outline is built, the last entry starting on or before the current page gets `.current` / `aria-current`, and an entry chosen by click stays current while the page still matches (several entries can share a page). Verified while scrolling, jumping between pages 2–15, clicking "Optimizer", and on a document with no outline (nothing marked, no errors). Forced-colours outline style included.
 
+### Seventy-fifth session (scanned document workflow)
+
+Opened the 40-page image-only scan and worked it like a reader tidying a scan.
+
+- **Performance:** first page painted in about half a second, 30 wheel scrolls through the document stayed smooth, ~10 page canvases kept alive, all 40 thumbnails rendered, JS heap around 18 MB. No console errors.
+- **Free highlight** drawn over an image page works (PDF.js free highlight), as expected on a page without text.
+- **Bug fixed:** after rotating selected pages the selection was lost, because the document reload rebuilt the thumbnails. A reader could not rotate again or delete the same pages without reselecting. Rotation now restores the selection; verified by selecting pages 2–3, rotating twice, then deleting them straight away (38 pages saved), and by rotating pages 5–6 counter-clockwise (pypdf shows /Rotate 270 on both, selection still "2 selected" afterwards). Ctrl+Z after the delete restored the pages with their rotation intact.
+- **UX fixed:** searching a scan said "Phrase not found", implying the word was simply absent. The find bar now checks the first few pages for text and says "No searchable text in this document (scanned pages?)" when there is none. Text documents still say "Phrase not found" and normal matches are unaffected.
+
 ## Open issues / follow-ups
 
 - Encrypted documents cannot have their password removed; merge/extract/split are refused on them (pdf-lib cannot re-encrypt).

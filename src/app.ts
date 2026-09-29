@@ -62,6 +62,7 @@ export class LeaflineApp {
   private history: { bytes: Uint8Array; dirty: boolean }[] = [];
   private undoToast: ToastElement | null = null;
   private outlineEntries: { page: number; link: HTMLButtonElement }[] = [];
+  private textProbe: { pdf: PDFDocumentProxy; result: Promise<boolean> } | null = null;
   private outlineCurrent: HTMLButtonElement | null = null;
   private undoneToast: ToastElement | null = null;
   private loadingTask: ReturnType<typeof pdfjs.getDocument> | null = null;
@@ -356,7 +357,7 @@ export class LeaflineApp {
   }
 
   // ---------- Page operations ----------
-  private async applyPageOp(label: string, fn: (bytes: Uint8Array) => Promise<Uint8Array>, page?: number): Promise<void> {
+  private async applyPageOp(label: string, fn: (bytes: Uint8Array) => Promise<Uint8Array>, page?: number, keepSelection?: number[]): Promise<void> {
     if (!this.pdf || this.busy) return;
     this.busy = true;
     this.setLoading(true, `${label}…`);
@@ -367,6 +368,8 @@ export class LeaflineApp {
       this.history.push(snapshot);
       if (this.history.length > 10) this.history.shift();
       await this.load({ data: out }, this.fileName, { page: page ?? this.viewer.currentPageNumber, scaleValue: this.fitted?.preset ?? this.viewer.currentScaleValue, dirty: true });
+      // Rotation keeps the same pages, so the reader can rotate again or delete without reselecting.
+      if (keepSelection) this.thumbs.setSelection(keepSelection);
       // Only the latest change can be undone, so never show two undo toasts at once.
       this.undoToast?.dismiss();
       this.undoToast = toast(`${label}. Click here or press Ctrl+Z to undo.`, "success", 10000);
@@ -693,12 +696,37 @@ export class LeaflineApp {
     if (this.pdf) this.viewer.update();
   }
 
+  /** Whether any page in the current document exposes text (cached per document). */
+  private hasSearchableText(): Promise<boolean> {
+    const pdf = this.pdf;
+    if (!pdf) return Promise.resolve(true);
+    if (this.textProbe?.pdf === pdf) return this.textProbe.result;
+    const result = (async () => {
+      // Scans without an OCR layer have no text on any page; checking the first few is enough.
+      for (let i = 1; i <= Math.min(pdf.numPages, 5); i++) {
+        try {
+          const items = (await (await pdf.getPage(i)).getTextContent()).items as { str?: string }[];
+          if (items.some((it) => it.str?.trim())) return true;
+        } catch { return true; }
+      }
+      return false;
+    })();
+    this.textProbe = { pdf, result };
+    return result;
+  }
+
   private showFindStatus(state: number, matches: { current: number; total: number }): void {
     const el = $("findStatus");
     el.classList.remove("notfound");
     const q = $<HTMLInputElement>("findInput").value;
     if (!q) { el.textContent = ""; return; }
-    if (state === FindState.NOT_FOUND) { el.textContent = "Phrase not found"; el.classList.add("notfound"); return; }
+    if (state === FindState.NOT_FOUND) {
+      el.textContent = "Phrase not found";
+      el.classList.add("notfound");
+      // A scan has nothing to search; say so instead of implying the phrase is merely absent.
+      void this.hasSearchableText().then((has) => { if (!has && el.textContent === "Phrase not found") el.textContent = "No searchable text in this document (scanned pages?)"; });
+      return;
+    }
     if (state === FindState.PENDING) { el.textContent = "Searching…"; return; }
     if (matches.total === 0) { el.textContent = ""; return; }
     el.textContent = `${matches.current} of ${matches.total} match${matches.total === 1 ? "" : "es"}${state === FindState.WRAPPED ? " (wrapped)" : ""}`;
@@ -727,8 +755,9 @@ export class LeaflineApp {
     const sel = () => this.thumbs.selection;
     $("pgSelectAll").onclick = () => this.thumbs.selectAll();
     $("pgClear").onclick = () => this.thumbs.clearSelection();
-    $("pgRotateCw").onclick = () => void this.applyPageOp(`Rotated ${sel().length} page(s)`, (b) => ops.rotatePages(b, sel(), 90));
-    $("pgRotateCcw").onclick = () => void this.applyPageOp(`Rotated ${sel().length} page(s)`, (b) => ops.rotatePages(b, sel(), -90));
+    const rotate = (deg: number) => { const s = sel(); void this.applyPageOp(`Rotated ${s.length} page(s)`, (b) => ops.rotatePages(b, s, deg), undefined, s); };
+    $("pgRotateCw").onclick = () => rotate(90);
+    $("pgRotateCcw").onclick = () => rotate(-90);
     $("pgDelete").onclick = () => {
       const s = sel();
       if (s.length >= this.viewer.pagesCount) { toast("A document must keep at least one page.", "error"); return; }
