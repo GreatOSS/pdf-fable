@@ -197,7 +197,10 @@ li.collapsed > .outline-list { display: none; }
    scaled font size and push their icon pseudo-elements off the baseline. */
 .annotationEditorLayer button, .editToolbar button { font: 13px/1 var(--font); }
 .editToolbar .buttons > *::before { display: block; }
-.pdfViewer .page { margin: 8px auto; border-image: none; box-shadow: 0 1px 5px rgba(0,0,0,0.25); }
+/* PDF.js sizes the text/annotation layers to the page's CSS width and draws a 9px transparent
+   border around it, so the page must stay content-box; our global border-box reset would shrink
+   the canvas by 18px and leave the overlay layers misaligned (worst on rotated pages). */
+.pdfViewer .page { box-sizing: content-box; margin: 8px auto; border-image: none; box-shadow: 0 1px 5px rgba(0,0,0,0.25); }
 .pdfViewer.removePageBorders .page { margin: 0 auto; }
 .viewer-container .pdfViewer { padding: 6px 0; }
 .textLayer ::selection { background: color-mix(in srgb, var(--accent) 35%, transparent); }

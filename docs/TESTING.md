@@ -629,6 +629,13 @@ Searched the welcome document with every find option, cross-checked against pypd
 - **Rotated page:** the "Rotate" match on the /Rotate 90 page is highlighted as a vertical 23 × 58 px box inside the page and scrolled into view.
 - No console errors. No product problems found.
 
+### Eighty-eighth session (text-layer alignment, found via the rotated-page highlight)
+
+The find highlight on the /Rotate 90 page looked one line to the right of its glyphs. Rendering the text layer in red showed the layer offset on every page, growing toward the bottom-right.
+
+- **Root cause:** the global `* { box-sizing: border-box }` reset applied to PDF.js's `.page`, which PDF.js designs as content-box with a 9 px transparent border. The canvas shrank to the 692 px content box while PDF.js sized the text and annotation layers to the page's 710 px width, so all overlay layers were 18 px too large in each direction (selection, find highlights, link hit areas and form widgets all drifted; up to a full line on the rotated page).
+- **Fix:** `.pdfViewer .page { box-sizing: content-box }`. Verified: canvas, text layer and annotation layer now share identical boxes on the portrait page (710 × 1004) and the rotated page (1004 × 710); the rotated highlight covers "Rota" exactly and "Form fields" shows a single crisp outline. Automatic fit still has no horizontal overflow at 1280 px, at 420 px, with odd spreads, and at page-width on the 60-page document.
+
 ## Open issues / follow-ups
 
 - Encrypted documents cannot have their password removed; merge/extract/split are refused on them (pdf-lib cannot re-encrypt).
