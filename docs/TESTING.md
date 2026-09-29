@@ -611,6 +611,15 @@ On the welcome document from the sidebar, as a reader assembling a hand-out.
 - **Undo:** Ctrl+Z removed the blank page (7 pages) and cleared the dirty flag, since that was the only change.
 - No console errors. No product problems found.
 
+### Eighty-sixth session (links, history after link jumps, text selection, select all)
+
+On the arXiv paper as a reader following citations and copying text.
+
+- **Links:** page 2 exposes 30 link annotations; a citation link jumps to the bibliography (page 11) and Alt+Left returns to page 2. External links carry `target="_blank"` and `rel="noopener noreferrer nofollow"`; no popups opened during the run.
+- **Selection:** drag-selecting and triple-clicking the title both yield exactly "Attention Is All You Need"; Ctrl+C leaves the selection intact.
+- **Rough edge fixed:** Ctrl+A selected the entire interface (sidebar labels, buttons) along with the document, so a paste carried UI text. Ctrl+A now selects only the rendered pages' text layers (7,113 characters here, starting with the first line of page 1 and ending on page 2, with no sidebar text). Inside the find box and a text annotation editor Ctrl+A still selects that field's own content.
+- No console errors.
+
 ## Open issues / follow-ups
 
 - Encrypted documents cannot have their password removed; merge/extract/split are refused on them (pdf-lib cannot re-encrypt).

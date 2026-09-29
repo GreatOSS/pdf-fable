@@ -1063,6 +1063,18 @@ export class LeaflineApp {
     await showDialog("dlgProps");
   }
 
+  /** Ctrl+A selects the document text only (rendered pages), not the surrounding interface. */
+  private selectAllText(): void {
+    const layers = [...this.container.querySelectorAll<HTMLElement>(".textLayer")].filter((l) => l.textContent?.trim());
+    if (!layers.length) return;
+    const range = document.createRange();
+    range.setStartBefore(layers[0].firstChild ?? layers[0]);
+    range.setEndAfter(layers[layers.length - 1].lastChild ?? layers[layers.length - 1]);
+    const sel = window.getSelection();
+    sel?.removeAllRanges();
+    sel?.addRange(range);
+  }
+
   // ---------- Keyboard ----------
   private bindKeyboard(): void {
     document.addEventListener("keydown", (e) => {
@@ -1081,6 +1093,7 @@ export class LeaflineApp {
         if (e.key === "-") { e.preventDefault(); this.zoom(-1); return; }
         if (e.key === "0") { e.preventDefault(); this.viewer.currentScaleValue = "auto"; return; }
         if (k === "z" && !e.shiftKey && TOOL_MODE[this.tool] === EditorType.NONE && !typing && this.history.length) { e.preventDefault(); void this.undoPageOp(); return; }
+        if (k === "a" && !typing && TOOL_MODE[this.tool] === EditorType.NONE) { e.preventDefault(); this.selectAllText(); return; }
         return;
       }
       if (e.key === "Escape") {
