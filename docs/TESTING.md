@@ -146,3 +146,11 @@ Open issues / follow-ups:
 - The delete icon of the PDF.js floating editor toolbar renders detached below its button in this build; the button itself works. Investigate CSS nesting/mask rules.
 - Printing was not exercised in the headless browser.
 - Not yet tested: XFA, multi-megabyte scans with unique images per page, touch devices, Firefox and Safari.
+
+## 2026-09-29 — twenty-fifth session (outline empty state, About dialog)
+
+Chromium via Playwright, dev server, `welcome.pdf` (no bookmarks).
+
+- Outline tab on a document without bookmarks shows "This document has no outline." centred in the panel; panel visible, no console errors.
+- Menu → About opens the dialog with name, version v0.1.0 (from package metadata), PDF.js/pdf-lib links and MIT notice; Close is the primary button; Escape closes it.
+- No defects found; no code changes.
