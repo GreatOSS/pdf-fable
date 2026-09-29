@@ -780,8 +780,28 @@ export class LeaflineApp {
   private bindMenu(): void {
     const menu = $("menu");
     const btn = $("btnMenu");
-    const close = () => { menu.hidden = true; btn.setAttribute("aria-expanded", "false"); };
-    btn.onclick = (e) => { e.stopPropagation(); menu.hidden = !menu.hidden; btn.setAttribute("aria-expanded", String(!menu.hidden)); this.syncMenuRadios(); };
+    const close = (refocus = false) => { menu.hidden = true; btn.setAttribute("aria-expanded", "false"); if (refocus) btn.focus(); };
+    const items = () => [...menu.querySelectorAll<HTMLButtonElement>("button")].filter((b) => b.offsetParent !== null);
+    btn.onclick = (e) => {
+      e.stopPropagation();
+      menu.hidden = !menu.hidden;
+      btn.setAttribute("aria-expanded", String(!menu.hidden));
+      this.syncMenuRadios();
+      // Keyboard users get focus on the first item; mouse users keep their pointer flow.
+      if (!menu.hidden && (e as PointerEvent).pointerType !== "mouse" && (e as MouseEvent).detail === 0) items()[0]?.focus();
+    };
+    // Standard menu keyboard pattern: arrows cycle through visible items, Home/End jump, Escape/Tab close.
+    menu.addEventListener("keydown", (e) => {
+      const list = items();
+      const i = list.indexOf(document.activeElement as HTMLButtonElement);
+      const go = (n: number) => { e.preventDefault(); list[(n + list.length) % list.length]?.focus(); };
+      if (e.key === "ArrowDown") go(i + 1);
+      else if (e.key === "ArrowUp") go(i - 1);
+      else if (e.key === "Home") go(0);
+      else if (e.key === "End") go(list.length - 1);
+      else if (e.key === "Escape") { e.preventDefault(); e.stopPropagation(); close(true); }
+      else if (e.key === "Tab") close();
+    });
     document.addEventListener("click", (e) => { if (!menu.hidden && !menu.contains(e.target as Node)) close(); });
     menu.querySelectorAll<HTMLButtonElement>("button").forEach((b) => {
       b.onclick = () => { close(); void this.menuAction(b.dataset.action!, b.dataset.value); };

@@ -439,6 +439,12 @@ Chromium via Playwright, dev server, welcome screen.
 - Three loads fired back to back (long, arXiv, welcome) without waiting: the last one wins (title "Welcome to Leafline", 7 pages, 7 thumbnails), the loading overlay hides, no toasts, and no console errors or warnings; the superseded loads are silent since the rapid-undo fix.
 - No defects found; no code changes.
 
+## 2026-09-29 — sixty-fifth session (menu keyboard navigation)
+
+Chromium via Playwright, dev server, `welcome.pdf`.
+
+- Found and fixed: opening the menu with the keyboard left focus on the button and arrow keys did nothing, forcing keyboard users to Tab through every item. The menu now follows the standard pattern: keyboard opening focuses the first item ("Open PDF…"), ArrowDown/ArrowUp cycle with wrap-around, Home/End jump to the ends, Enter activates (reached "Keyboard shortcuts" and opened the dialog), Escape closes and returns focus to the menu button, Tab closes. Mouse opening does not move focus.
+
 ## Open issues / follow-ups
 
 - Encrypted documents cannot have their password removed; merge/extract/split are refused on them (pdf-lib cannot re-encrypt).
