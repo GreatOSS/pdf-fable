@@ -21,9 +21,12 @@ Fixed during testing:
 - Editing tool was set before PDF.js created its editor manager ("AnnotationEditor is not enabled"); now applied on `pagesinit`.
 - Deleting a page jumped to page 1 instead of staying near the deleted page.
 - Thumbnail list had a stray horizontal scrollbar.
+- Mixed page sizes: "Automatic"/"Fit width" now also fit the widest page (verified: container scrollWidth equals clientWidth on the sample with a landscape page).
+- A custom zoom level (from Ctrl+wheel) was persisted and restored for the next document; only presets are persisted now.
+- Undo for page changes: toast lasts 10 s and Ctrl+Z (outside annotation tools) or the menu undoes the last page change.
 
 Open issues / follow-ups:
-- With "Automatic" zoom, a landscape page in a portrait document is wider than the viewport (same behaviour as the stock PDF.js viewer). Consider fitting the widest page when sizes are mixed.
+- After fitting the widest page, the zoom select shows a percentage instead of "Automatic"; consider keeping the preset label.
 - The delete icon of the PDF.js floating editor toolbar renders detached below its button in this build; the button itself works. Investigate CSS nesting/mask rules.
 - Printing was not exercised in the headless browser.
 - Not yet tested: password-protected PDFs, XFA, very large scanned PDFs, touch devices, Firefox and Safari.

@@ -140,6 +140,7 @@ export class LeaflineApp {
       if (v?.page) this.viewer.currentPageNumber = Math.min(v.page, this.viewer.pagesCount);
       this.viewer.scrollMode = prefs.get("scrollMode", ScrollMode.VERTICAL);
       this.viewer.spreadMode = prefs.get("spreadMode", SpreadMode.NONE);
+      this.fitWidestPage();
       this.syncMenuRadios();
       this.setTool(v?.page === undefined ? "select" : this.tool);
       this.container.focus();
@@ -158,7 +159,6 @@ export class LeaflineApp {
         custom.textContent = `${Math.round(scale * 100)}%`;
         custom.hidden = false;
         sel.value = "custom";
-        prefs.set("zoom", String(scale));
       }
     });
     bus.on("annotationeditoruimanager", ({ uiManager }: { uiManager: unknown }) => { this.uiManager = uiManager; });
@@ -434,7 +434,7 @@ export class LeaflineApp {
     $("btnZoomOut").onclick = () => this.zoom(-1);
     $<HTMLSelectElement>("zoomSelect").onchange = (e) => {
       const v = (e.target as HTMLSelectElement).value;
-      if (v !== "custom") this.viewer.currentScaleValue = v;
+      if (v !== "custom") { this.viewer.currentScaleValue = v; this.fitWidestPage(); }
       this.container.focus();
     };
     document.querySelectorAll<HTMLButtonElement>(".tool").forEach((b) => {
@@ -487,6 +487,18 @@ export class LeaflineApp {
     let s = this.viewer.currentScale;
     s = direction > 0 ? Math.min(10, Math.ceil(s * 1.1 * 10) / 10) : Math.max(0.1, Math.floor((s / 1.1) * 10) / 10);
     this.viewer.currentScaleValue = String(s);
+  }
+
+  /** For documents with mixed page sizes, "auto"/"page-width" fit the current page only (PDF.js
+   *  behaviour). Shrink further so the widest page also fits, avoiding a horizontal scrollbar. */
+  private fitWidestPage(): void {
+    const v = this.viewer;
+    if (!this.pdf || v.hasEqualPageSizes) return;
+    if (!["auto", "page-width"].includes(v.currentScaleValue)) return;
+    let maxW = 0;
+    for (let i = 0; i < v.pagesCount; i++) maxW = Math.max(maxW, (v.getPageView(i) as { width: number }).width);
+    const available = this.container.clientWidth - 16;
+    if (maxW > available) v.currentScaleValue = String(v.currentScale * available / maxW);
   }
 
   private rotate(delta: number): void {
