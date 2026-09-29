@@ -411,6 +411,13 @@ Chromium via Playwright, dev server, `long.pdf` (60 pages).
 - Ctrl+P shows the loading overlay with live progress ("Preparing to print… 8/60", later 21/60) and marks the app busy; a second Ctrl+P during preparation is ignored (`window.print` called exactly once). Afterwards the overlay hides, the print container is cleared and the app is no longer busy.
 - No defects found; no code changes.
 
+## 2026-09-29 — sixty-first session (page-op speed on a 60-page document)
+
+Chromium via Playwright, dev server, `long.pdf`.
+
+- Delete page 30 via the sidebar: 326 ms from click to reloaded 59-page view; Ctrl+Z restores 60 pages in 243 ms, staying on page 30, history empty and document clean. JS heap 17 → 19 → 18 MB, so snapshots are released.
+- No defects found; no code changes.
+
 ## Open issues / follow-ups
 
 - Switching documents very quickly logs a benign "Transport destroyed" console error from the previous viewer initialization.
