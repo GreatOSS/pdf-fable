@@ -328,6 +328,13 @@ Chromium via Playwright, dev server, `welcome.pdf`.
 - All editor parameters (highlight colour/thickness, text colour/size, ink colour/thickness/opacity) are now verified against saved bytes.
 - No defects found; no code changes.
 
+## 2026-09-29 — forty-ninth session (deleting a pre-existing annotation)
+
+Chromium via Playwright, dev server, `welcome.pdf`.
+
+- A text highlight was saved, the saved bytes reloaded as a new document (highlight rendered by the annotation layer), the highlight tool selected, the existing highlight clicked and removed with Delete. The next save writes page 1 with an empty `/Annots` array; pypdf confirms no highlight remains on any page (7 pages intact).
+- No defects found; no code changes.
+
 ## Open issues / follow-ups
 
 - Switching documents very quickly logs a benign "Transport destroyed" console error from the previous viewer initialization.
