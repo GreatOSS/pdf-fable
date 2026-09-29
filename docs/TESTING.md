@@ -584,6 +584,15 @@ Switched the welcome document through Horizontal, Wrapped, Odd/Even spreads and 
 - **Bug fixed (horizontal mode navigation):** Left/Right arrows fell through to a 40 px native scroll and the wheel only moved vertically, so nothing turned the page. Arrows now turn pages in horizontal mode, and the wheel reads down the page then moves to the next one (same logic as single-page mode). Verified arrows 1 → 2 → 3 → 2, wheel 2 → 3 → 4 with in-page scrolling first, page-fit one page per notch.
 - **Checked, fine:** wrapped mode at this width shows one page per row (the same as Firefox at this zoom); single page + odd spreads shows pages 1–2 together and the wheel scrolls the tall spread before turning; preferences persist for scroll and spread modes.
 
+### Eighty-third session (presentation mode)
+
+Pressed F5 on page 3 of the welcome document and drove the slide show.
+
+- **Entering:** fullscreen on the viewer, toolbar/sidebar hidden, black background, single-page layout at page-fit with only the current page visible; the previous zoom, scroll and spread modes come back on Escape.
+- **Keys and wheel:** ArrowRight, Space, PageDown advance; ArrowLeft goes back; wheel down/up turns pages; Home/End jump; ArrowRight on the last page stays put.
+- **Gap fixed:** clicking a slide did nothing, unlike Firefox's viewer. Left click now advances, right click goes back (context menu suppressed), the cursor hides after 2.5 s idle and returns on movement, and text selection is off during the show. Verified 2 → 3 → 4 by click, → 3 by right click, cursor none while idle then auto again; after Escape clicks and right clicks no longer turn pages and the cursor state is cleared.
+- No console errors.
+
 ## Open issues / follow-ups
 
 - Encrypted documents cannot have their password removed; merge/extract/split are refused on them (pdf-lib cannot re-encrypt).

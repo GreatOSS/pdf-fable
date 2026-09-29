@@ -208,6 +208,8 @@ li.collapsed > .outline-list { display: none; }
 .app.presentation .viewer-container::-webkit-scrollbar { display: none; }
 .app.presentation .viewer-container .pdfViewer { padding: 0; }
 .app.presentation .pdfViewer .page { margin: 0 auto; box-shadow: none; }
+.app.presentation .viewer-wrap { user-select: none; }
+.app.presentation .viewer-wrap.idle, .app.presentation .viewer-wrap.idle * { cursor: none; }
 
 /* Print */
 #printContainer { display: none; }

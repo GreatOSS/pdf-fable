@@ -993,9 +993,22 @@ export class LeaflineApp {
     if (!this.pdf) return;
     const wrap = $("viewerWrap");
     const prev = { scroll: this.viewer.scrollMode, spread: this.viewer.spreadMode, scale: this.fitted?.preset ?? this.viewer.currentScaleValue };
+    // Slide-show input: click or wheel advances, right-click goes back, and the cursor hides while idle.
+    let idle = 0;
+    const wake = () => { wrap.classList.remove("idle"); clearTimeout(idle); idle = window.setTimeout(() => wrap.classList.add("idle"), 2500); };
+    const onClick = (e: MouseEvent) => {
+      if ((e.target as HTMLElement).closest("a, .annotationLayer section, .annotationEditorLayer")) return;
+      if (e.button === 0) this.viewer.nextPage();
+    };
+    const onContext = (e: MouseEvent) => { e.preventDefault(); this.viewer.previousPage(); };
     const onChange = () => {
       if (document.fullscreenElement === wrap) return;
       document.removeEventListener("fullscreenchange", onChange);
+      wrap.removeEventListener("click", onClick);
+      wrap.removeEventListener("contextmenu", onContext);
+      wrap.removeEventListener("mousemove", wake);
+      clearTimeout(idle);
+      wrap.classList.remove("idle");
       this.app.classList.remove("presentation");
       this.viewer.scrollMode = prev.scroll;
       this.viewer.spreadMode = prev.spread;
@@ -1007,6 +1020,10 @@ export class LeaflineApp {
       await wrap.requestFullscreen();
       this.app.classList.add("presentation");
       document.addEventListener("fullscreenchange", onChange);
+      wrap.addEventListener("click", onClick);
+      wrap.addEventListener("contextmenu", onContext);
+      wrap.addEventListener("mousemove", wake);
+      wake();
       this.viewer.scrollMode = ScrollMode.PAGE;
       this.viewer.spreadMode = SpreadMode.NONE;
       this.fitted = null;
