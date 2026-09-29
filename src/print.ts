@@ -7,6 +7,7 @@ export async function printDocument(
   pdf: PDFDocumentProxy,
   container: HTMLElement,
   onProgress?: (done: number, total: number) => void,
+  rotation = 0,
 ): Promise<void> {
   container.innerHTML = "";
   const total = pdf.numPages;
@@ -18,7 +19,8 @@ export async function printDocument(
   container.appendChild(style);
   for (let i = 1; i <= total; i++) {
     const page = await pdf.getPage(i);
-    const viewport = page.getViewport({ scale });
+    // Honour the on-screen view rotation, like the PDF.js reference viewer does when printing.
+    const viewport = page.getViewport({ scale, rotation: (page.rotate + rotation + 360) % 360 });
     const canvas = document.createElement("canvas");
     canvas.width = Math.floor(viewport.width);
     canvas.height = Math.floor(viewport.height);

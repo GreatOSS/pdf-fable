@@ -391,6 +391,12 @@ Chromium via Playwright, dev server, `arxiv.pdf` (15 pages, US Letter), real pri
 - CI green on the mixed-size print fix. Print preparation took 1.7 s at 150 DPI; one `@page` size (8.5×11 in) plus one named page; print-to-PDF yields 15 Letter sheets with one page image each (4.6 MB).
 - No defects found; no code changes.
 
+## 2026-09-29 — fifty-eighth session (printing a rotated view)
+
+Chromium via Playwright, dev server, `second.pdf` (A5 portrait), view rotated 90° with `r`, real print-to-PDF of the print container.
+
+- Found and changed: printing ignored the on-screen view rotation, unlike the PDF.js reference viewer. The print pipeline now adds the view rotation to each page's viewport. With the view rotated, the three pages rasterise at 1240×874 and print on 8.27×5.83 in landscape sheets; unrotated printing is unchanged (previous sessions).
+
 ## Open issues / follow-ups
 
 - Switching documents very quickly logs a benign "Transport destroyed" console error from the previous viewer initialization.

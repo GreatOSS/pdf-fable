@@ -599,7 +599,7 @@ export class LeaflineApp {
       const task = pdfjs.getDocument({ data: bytes, cMapUrl: `${ASSETS}cmaps/`, standardFontDataUrl: `${ASSETS}standard_fonts/`, wasmUrl: `${ASSETS}wasm/`, iccUrl: `${ASSETS}iccs/` });
       const doc = await task.promise;
       this.setLoading(true, "Preparing to print…");
-      await printDocument(doc, pc, (d, t) => this.setLoading(true, `Preparing to print… ${d}/${t}`));
+      await printDocument(doc, pc, (d, t) => this.setLoading(true, `Preparing to print… ${d}/${t}`), this.viewer.pagesRotation);
       await task.destroy();
     } catch (err) {
       console.error(err);
