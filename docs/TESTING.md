@@ -377,6 +377,13 @@ Chromium via Playwright, dev server, `welcome.pdf` page 6, after the print rende
 - CI green on the print fix. Checked checkbox prints its check mark (105 dark pixels inside the box); a red ink stroke on the same page prints along the row derived from its saved Rect (506 red pixels of 1240). Form widgets and annotations both render under annotation mode ENABLE.
 - No defects found; no code changes.
 
+## 2026-09-29 — fifty-sixth session (printing mixed page sizes)
+
+Chromium via Playwright, dev server, `welcome.pdf` (A4 portrait with a landscape page 5 and a /Rotate 90 page 7).
+
+- Found and fixed: the print container declared a single portrait `@page` size taken from page 1, so the two landscape pages (11.7 in wide) would have been clipped on 8.3 in sheets. The print pipeline now emits one CSS named page per distinct sheet size and assigns each page wrapper its `page` name (the unnamed rule keeps the first size as a fallback for browsers without named-page support).
+- Verified with Chromium's own print-to-PDF of the populated print container: 7 sheets, sheets 5 and 7 are 11.69×8.26 in landscape, the others 8.26×11.69 in portrait.
+
 ## Open issues / follow-ups
 
 - Switching documents very quickly logs a benign "Transport destroyed" console error from the previous viewer initialization.

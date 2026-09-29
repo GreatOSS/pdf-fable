@@ -11,7 +11,11 @@ export async function printDocument(
   container.innerHTML = "";
   const total = pdf.numPages;
   const scale = PRINT_DPI / 72;
-  let style = container.querySelector("style");
+  // One CSS named page per distinct sheet size so mixed portrait/landscape documents print
+  // without clipping (browsers that ignore the `page` property fall back to the first size).
+  const style = document.createElement("style");
+  const sizes = new Map<string, string>();
+  container.appendChild(style);
   for (let i = 1; i <= total; i++) {
     const page = await pdf.getPage(i);
     const viewport = page.getViewport({ scale });
@@ -32,11 +36,14 @@ export async function printDocument(
     const hIn = viewport.height / PRINT_DPI;
     wrap.style.width = `${wIn}in`;
     wrap.style.height = `${hIn}in`;
-    if (i === 1) {
-      style = document.createElement("style");
-      style.textContent = `@page { size: ${wIn}in ${hIn}in; margin: 0; }`;
-      container.appendChild(style);
+    const key = `${wIn.toFixed(4)}x${hIn.toFixed(4)}`;
+    if (!sizes.has(key)) {
+      const name = `leafline-p${sizes.size}`;
+      sizes.set(key, name);
+      style.textContent += sizes.size === 1 ? `@page { size: ${wIn}in ${hIn}in; margin: 0; }\n` : "";
+      style.textContent += `@page ${name} { size: ${wIn}in ${hIn}in; margin: 0; }\n`;
     }
+    wrap.style.setProperty("page", sizes.get(key)!);
     wrap.appendChild(img);
     container.appendChild(wrap);
     onProgress?.(i, total);
