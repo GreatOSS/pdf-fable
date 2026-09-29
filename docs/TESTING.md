@@ -465,6 +465,13 @@ Chromium via Playwright, dev server, `welcome.pdf`.
 - CI green on the focus-return fix. Thumbnails are focusable list items: Space toggles selection ("1 selected", checkbox checked, focus retained), Enter jumps to the page (page 3) and moves focus to the viewer for immediate scrolling. Checkboxes are separately tabbable with "Select page N" labels.
 - Added: each thumbnail now has an accessible name ("Page N") and the current page carries `aria-current="page"` (verified: only thumbnail 3 after jumping there).
 
+## 2026-09-29 — sixty-ninth session (accessible-name audit, outline toggles)
+
+Chromium via Playwright, dev server, `arxiv.pdf`.
+
+- CI green on the thumbnail semantics change. Audit: every visible button, input and select (plus the menu items) has an accessible name.
+- Found and fixed: outline expand/collapse toggles were labelled just "Toggle" with no state, and the 18 hidden leaf toggles were still in the tab order. Toggles now read "Collapse Model Architecture" / "Expand Model Architecture" with `aria-expanded`, and leaf toggles are `tabindex=-1` and aria-hidden (outline tab stops 44 → 26). Enter on a toggle collapses/expands; Tab then Enter on the entry jumps to page 3.
+
 ## Open issues / follow-ups
 
 - Encrypted documents cannot have their password removed; merge/extract/split are refused on them (pdf-lib cannot re-encrypt).

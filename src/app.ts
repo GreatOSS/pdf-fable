@@ -776,9 +776,15 @@ export class LeaflineApp {
         row.className = "outline-item";
         const tg = document.createElement("button");
         tg.className = "outline-toggle" + (it.items?.length ? "" : " leaf");
-        tg.textContent = "▾";
-        tg.setAttribute("aria-label", "Toggle");
-        tg.onclick = () => { li.classList.toggle("collapsed"); tg.textContent = li.classList.contains("collapsed") ? "▸" : "▾"; };
+        const setExpanded = (open: boolean) => {
+          li.classList.toggle("collapsed", !open);
+          tg.textContent = open ? "▾" : "▸";
+          tg.setAttribute("aria-expanded", String(open));
+          tg.setAttribute("aria-label", `${open ? "Collapse" : "Expand"} ${it.title || "section"}`);
+        };
+        if (it.items?.length) setExpanded(true);
+        else { tg.textContent = "▾"; tg.tabIndex = -1; tg.setAttribute("aria-hidden", "true"); }
+        tg.onclick = () => setExpanded(li.classList.contains("collapsed"));
         const link = document.createElement("button");
         link.className = "outline-link" + (it.bold ? " bold" : "") + (it.italic ? " italic" : "");
         link.textContent = it.title || "(untitled)";
@@ -789,7 +795,7 @@ export class LeaflineApp {
         };
         row.append(tg, link);
         li.appendChild(row);
-        if (it.items?.length) { li.appendChild(build(it.items)); if (items.length > 20) { li.classList.add("collapsed"); tg.textContent = "▸"; } }
+        if (it.items?.length) { li.appendChild(build(it.items)); if (items.length > 20) setExpanded(false); }
         ul.appendChild(li);
       }
       return ul;
