@@ -276,6 +276,13 @@ Chromium via Playwright, dev server, `second.pdf` (3 pages).
 - Select all → Delete: error toast "A document must keep at least one page."; document unchanged (3 pages), not dirty, no undo entry, selection still "3 selected", loading overlay hidden, app not busy.
 - No defects found; no code changes.
 
+## 2026-09-29 — forty-second session (merging a password-protected file)
+
+Chromium via Playwright, dev server, `welcome.pdf` open; `encrypted.pdf` injected into the merge file input.
+
+- Toast "Page change failed: The file to merge is password-protected; remove its password first."; document unchanged (7 pages), not dirty, no undo entry, no password prompt, loading overlay hidden. Console shows only the app's own logged error for the failed operation.
+- No defects found; no code changes.
+
 ## Open issues / follow-ups
 
 - Switching documents very quickly logs a benign "Transport destroyed" console error from the previous viewer initialization.
