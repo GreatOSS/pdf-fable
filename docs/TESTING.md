@@ -236,6 +236,14 @@ Chromium via Playwright, dev server, `welcome.pdf`, sidebar open.
 - CI green on the dirty-flag fix. Rotate page 1 right, then insert a blank page: 8 pages, page 1 /Rotate 90, blank page 2, no overflow, two history entries. Ctrl+Z twice restores 7 pages, rotation 0, history empty, document not dirty.
 - Found and fixed: both undo toasts stayed on screen, but clicking the older "Rotated…" toast would have undone the blank-page insert (undo always reverts the latest change). Toasts now expose `dismiss()`; a new page change or an undo dismisses the previous undo toast. Verified only "Inserted a blank page…" remains after the second change and it disappears on undo.
 
+## 2026-09-29 — thirty-seventh session (zoom shortcuts and buttons)
+
+Chromium via Playwright, dev server, `arxiv.pdf`, Automatic zoom (1.21).
+
+- CI green on the undo-toast fix. Ctrl+= steps to 140% (next 10% step up), Ctrl+- twice to 120% then 100%, select shows the custom percentage; Ctrl+0 returns to Automatic (1.21) and the select and stored preference read "auto".
+- Toolbar + / − buttons step 140% and back to 120%; custom levels are not persisted (preference stays "auto").
+- No defects found; no code changes.
+
 ## Open issues / follow-ups
 
 - Switching documents very quickly logs a benign "Transport destroyed" console error from the previous viewer initialization.
