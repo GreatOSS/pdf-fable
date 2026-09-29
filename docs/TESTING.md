@@ -189,6 +189,15 @@ Chromium via Playwright, dev server, `welcome.pdf` open; a text file injected in
 - Console shows only PDF.js's own InvalidPDFException and an "Indexing all PDF objects" warning, both expected.
 - No defects found; no code changes.
 
+## 2026-09-29 — thirty-first session (spreads, wrapped scrolling)
+
+Chromium via Playwright, dev server, `arxiv.pdf` (15 pages), 1280×720.
+
+- Odd spreads: 8 spreads, pages 1+2 side by side, Automatic zoom re-fits to 0.60 so both pages fit with no horizontal overflow.
+- Even spreads: page 1 sits alone in the first spread, no overflow.
+- Menu → No spreads, then Menu → Wrapped: at Automatic zoom the layout is one page per row (Automatic fits page width, as in PDF.js); at 50% it forms a two-column grid with no overflow. Menu radios show "Wrapped" and "No spreads" checked. Preferences persist under `leafline.scrollMode` / `leafline.spreadMode`.
+- No defects found; no code changes.
+
 ## Open issues / follow-ups
 
 - Switching documents very quickly logs a benign "Transport destroyed" console error from the previous viewer initialization.
