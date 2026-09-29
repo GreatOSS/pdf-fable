@@ -431,6 +431,8 @@ export class LeaflineApp {
   private dispatchParam(name: string, value: unknown): void {
     const type = (ParamType as unknown as Record<string, number>)[name];
     if (type === undefined) return;
+    // The opacity slider is 1–100 but the ink editor (and the /CA entry it writes) expects 0–1.
+    if (name === "INK_OPACITY" && typeof value === "number") value = value / 100;
     this.eventBus.dispatch("switchannotationeditorparams", { source: this, type, value });
   }
 

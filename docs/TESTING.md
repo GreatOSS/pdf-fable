@@ -305,6 +305,14 @@ Chromium via Playwright, dev server, `welcome.pdf`.
 - A PDF.js "Cannot read properties of null (reading 'addButton')" error appeared only when the note was deleted programmatically mid-edit from the console; the real user path (type, switch to the select tool, reselect the note) logs no errors.
 - No defects found; no code changes.
 
+## 2026-09-29 — forty-sixth session (ink colour, thickness and opacity parameters)
+
+Chromium via Playwright, dev server, `welcome.pdf`.
+
+- Editor bar: colour #ff0000, thickness 8, opacity 50, then an ink stroke. Saved annotation carries `/C [1 0 0]` and `/BS << /W 8 >>`.
+- Found and fixed: opacity was written as `/CA 50` (and `/CA 100` by default), outside the PDF range 0–1, and the stroke rendered fully opaque. The slider value is now divided by 100 before dispatch, matching PDF.js's own toolbar; the saved annotation now has `/CA 0.5` and the stroke renders translucent.
+- The thin frame that extends slightly past the page edge right after Escape is the ink editor's transient selection box; it disappears on the next click.
+
 ## Open issues / follow-ups
 
 - Switching documents very quickly logs a benign "Transport destroyed" console error from the previous viewer initialization.
