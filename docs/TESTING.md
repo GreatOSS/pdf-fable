@@ -646,6 +646,15 @@ Re-checked everything that depends on page geometry after restoring content-box 
 - **Fit:** no horizontal overflow at Automatic on 1280 px or 420 px, with odd spreads, or at page-width on the 60-page document (checked in the previous session).
 - No console errors. No regressions found.
 
+### Ninetieth session (production build via `vite preview`)
+
+Built `dist/` and drove the static bundle on port 4173, since all recent sessions ran against the dev server.
+
+- **Bundle:** one hashed JS, CSS and worker asset, the inline theme script kept in the head, no failed requests, first page painted in about 0.4 s. The content-box page rule is in the built CSS and canvas/text layer share the same box (880 × 1244).
+- **Workflows:** find ("annotate" 1 of 2), a text note saved into the bytes (pypdf-verified in the dev sessions; here 12,141 bytes vs the 10,705-byte original), rotate from the sidebar with undo toast, print produces 7 page images, dark theme toggles. No console errors or warnings.
+- **False alarm resolved:** the first run appeared to lose the note (bytes identical to the original). Cause: after a find jump the top of page 1 was 112 px above the viewport, so a click at "page top + 200 px" hit the editor bar rather than the page. Clicking inside the visible page region creates and saves the note. Not a product problem; caveat recorded for future sessions.
+- Note: `dist/` ships a 3.6 MB source map alongside the bundle; acceptable for a self-hosted private deployment.
+
 ## Open issues / follow-ups
 
 - Encrypted documents cannot have their password removed; merge/extract/split are refused on them (pdf-lib cannot re-encrypt).
