@@ -593,6 +593,15 @@ Pressed F5 on page 3 of the welcome document and drove the slide show.
 - **Gap fixed:** clicking a slide did nothing, unlike Firefox's viewer. Left click now advances, right click goes back (context menu suppressed), the cursor hides after 2.5 s idle and returns on movement, and text selection is off during the show. Verified 2 → 3 → 4 by click, → 3 by right click, cursor none while idle then auto again; after Escape clicks and right clicks no longer turn pages and the cursor state is cleared.
 - No console errors.
 
+### Eighty-fourth session (document properties, dark theme, inverted pages)
+
+On the arXiv paper: opened Document properties, switched to the dark theme, inverted page colours and highlighted text under inversion.
+
+- **Properties:** every row matches pypdf (2.11 MB, empty title/author shown as "—", created/modified 4/10/2024, LaTeX with hyperref, pdfTeX-1.40.25, PDF 1.5, 15 pages, 216 × 279 mm / 8.50 × 11.00 in, fast web view No). Focus lands on Close; Escape closes and returns focus to the menu button.
+- **Dark theme + invert:** the invert filter applies only to page canvases/images (not the UI or text layer), the menu item reflects `aria-checked`, and the preference persists; turning both off restores the light theme and removes the filter.
+- **Highlight under inversion:** a highlight on the title renders as yellow text on the dark page (multiply blend over inverted pixels), fully legible; the same as Firefox's viewer. Left as-is.
+- No console errors. No product problems found.
+
 ## Open issues / follow-ups
 
 - Encrypted documents cannot have their password removed; merge/extract/split are refused on them (pdf-lib cannot re-encrypt).
