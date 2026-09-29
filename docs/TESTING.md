@@ -566,6 +566,16 @@ Opened the AES-256 sample (user password "leaf") and worked it as a reader.
 - No console errors. No product problems found.
 - Harness note: awaiting `leafline.openUrl()` inside `page.evaluate` deadlocks when a password dialog follows; fire it with `setTimeout` instead.
 
+### Eighty-first session (single-page mode, page box, navigation history)
+
+Read the 60-page sample in "Single page" scrolling mode and navigated with keys, the page box and history.
+
+- **Keys:** PageDown/ArrowRight/ArrowLeft/End move one page at a time and stop at the last page; the page box tracks every move.
+- **Bug fixed:** the mouse wheel did nothing in single-page mode, so a mouse user had to use keys or buttons. The wheel now turns the page once the current page cannot scroll further (with a 24 px allowance for PDF.js's page margins), accumulates small notches to a 50 px threshold, and ignores trackpad inertia for 400 ms after a turn. Verified: fitted page 30 → 31 → 32 → 33 → 32 → 31 → 30 one page per notch; a page-width page scrolls inside itself first and turns at the edge; vertical mode is unchanged; Ctrl+wheel still zooms.
+- **Bug fixed:** typing a non-number in the page box jumped to page 1; it now stays on the current page. Out-of-range numbers still clamp (999 → 60).
+- **Bug fixed:** jumps typed into the page box were not recorded in the navigation history, so Alt+Left did nothing after them. The box now goes through the link service; verified 22 → 48, Alt+Left → 22, Alt+Right → 48.
+- Note: turning back onto a taller page lands at its top, not its bottom, the same as Firefox's viewer.
+
 ## Open issues / follow-ups
 
 - Encrypted documents cannot have their password removed; merge/extract/split are refused on them (pdf-lib cannot re-encrypt).

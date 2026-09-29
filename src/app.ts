@@ -481,8 +481,11 @@ export class LeaflineApp {
     $("btnNext").onclick = () => this.viewer.nextPage();
     const pageInput = $<HTMLInputElement>("pageInput");
     pageInput.onchange = () => {
-      const n = Math.max(1, Math.min(Number(pageInput.value) || 1, this.viewer.pagesCount));
-      this.viewer.currentPageNumber = n;
+      // Non-numeric input keeps the current page; out-of-range numbers clamp. Going through the
+      // link service records the jump so Alt+Left can return to where the reader came from.
+      const typed = parseInt(pageInput.value, 10);
+      const n = Number.isFinite(typed) ? Math.max(1, Math.min(typed, this.viewer.pagesCount)) : this.viewer.currentPageNumber;
+      if (n !== this.viewer.currentPageNumber) this.linkService.goToPage(n);
       pageInput.value = String(n);
       this.container.focus();
     };
@@ -519,12 +522,40 @@ export class LeaflineApp {
     $("btnPrint").onclick = () => void this.print();
     $("btnTheme").onclick = () => this.setTheme(document.documentElement.dataset.theme === "dark" ? "light" : "dark");
     this.container.addEventListener("wheel", (e) => {
-      if (!(e.ctrlKey || e.metaKey) || !this.pdf) return;
-      e.preventDefault();
-      const steps = e.deltaMode === 0 ? -e.deltaY / 100 : -Math.sign(e.deltaY);
-      this.zoomAt(this.viewer.currentScale * Math.pow(1.1, steps), e.clientX, e.clientY);
+      if (!this.pdf) return;
+      if (e.ctrlKey || e.metaKey) {
+        e.preventDefault();
+        const steps = e.deltaMode === 0 ? -e.deltaY / 100 : -Math.sign(e.deltaY);
+        this.zoomAt(this.viewer.currentScale * Math.pow(1.1, steps), e.clientX, e.clientY);
+        return;
+      }
+      if (this.viewer.scrollMode === ScrollMode.PAGE) this.wheelPage(e);
     }, { passive: false });
     this.bindPinchZoom();
+  }
+
+  private wheelAcc = 0;
+  private wheelLast = 0;
+  /** In single-page mode the wheel turns pages once the current page cannot scroll any further. */
+  private wheelPage(e: WheelEvent): void {
+    if (e.deltaY === 0) return;
+    const c = this.container;
+    const down = e.deltaY > 0;
+    // PDF.js leaves a small page margin above and below; treat it as the edge so a fitted page
+    // turns on the first notch in either direction.
+    const margin = 24;
+    const atEdge = down ? c.scrollTop + c.clientHeight >= c.scrollHeight - margin : c.scrollTop <= margin;
+    if (!atEdge) { this.wheelAcc = 0; return; }
+    const now = performance.now();
+    // Trackpads keep sending inertia events after a flick; ignore them briefly after a page turn.
+    if (now - this.wheelLast < 400) { e.preventDefault(); return; }
+    const delta = e.deltaMode === 0 ? e.deltaY : e.deltaY * 40;
+    this.wheelAcc = Math.sign(delta) === Math.sign(this.wheelAcc) ? this.wheelAcc + delta : delta;
+    if (Math.abs(this.wheelAcc) < 50) return;
+    this.wheelAcc = 0;
+    this.wheelLast = now;
+    e.preventDefault();
+    if (down) this.viewer.nextPage(); else this.viewer.previousPage();
   }
 
   /** Sets an absolute scale while keeping the document point under (clientX, clientY) fixed. */
