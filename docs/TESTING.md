@@ -556,6 +556,16 @@ Used the Add image tool end to end. The native picker cannot be driven, so `HTML
 - **Bug fixed:** after cancelling the picker (or toggling the tool off and on), clicking the Add image tool again never reopened the picker, because the CREATE request fired before PDF.js finished a deferred editor-mode switch. The picker request now waits for the `annotationeditormodechanged` event when the layer is not yet in stamp mode. Verified five consecutive tool clicks each open the picker, across cancel, toggle, switch-from-text and with an existing stamp. The "Add image…" bar button was unaffected.
 - Known: thumbnails do not show unsaved editor content (matches Firefox's viewer); they update after save/reload.
 
+### Eightieth session (encrypted document: password prompt, page op, ink, save)
+
+Opened the AES-256 sample (user password "leaf") and worked it as a reader.
+
+- **Prompt:** "Password required" dialog with the password field focused; a wrong password re-prompts with "Incorrect password. Try again." and an emptied field; the right password opens the 7 pages. Cancelling from the welcome screen closes the dialog, clears the loading overlay and leaves the welcome screen with no toast.
+- **Page operation:** rotating page 1 from the sidebar succeeded without a second password prompt (the password is reused for the reload) and the selection stayed live.
+- **Ink + save:** drew a stroke on page 2, saved via `currentBytes()`. pypdf: the file is still encrypted (V5/R6), refuses the empty password, opens with "leaf", page 1 has /Rotate 90, page 2 carries an /Ink annotation with 42 points and /CA 1.
+- No console errors. No product problems found.
+- Harness note: awaiting `leafline.openUrl()` inside `page.evaluate` deadlocks when a password dialog follows; fire it with `setTimeout` instead.
+
 ## Open issues / follow-ups
 
 - Encrypted documents cannot have their password removed; merge/extract/split are refused on them (pdf-lib cannot re-encrypt).
