@@ -253,6 +253,14 @@ Chromium via Playwright, dev server, `welcome.pdf`.
 - Console: one benign PDF.js warning, font "Helv" not available, fallback used for the note's appearance stream.
 - No defects found; no code changes.
 
+## 2026-09-29 — thirty-ninth session (annotation save on an encrypted document)
+
+Chromium via Playwright, dev server, `encrypted.pdf` (AES-256, user password "leaf").
+
+- Password dialog focused on load; "leaf" + Enter opens the 7-page document. Ink stroke on page 1, Escape, then the saved bytes were posted to a local receiver and checked with pypdf: file still encrypted, `decrypt("leaf")` succeeds, page 1 carries one `/Ink` annotation with Rect [75 383 333 474] and a decryptable appearance stream (`78.39 470.42 m 329.92 386.57 l S`); title intact; the file is unreadable without the password. PDF.js's incremental save keeps the original `/Encrypt` dictionary and encrypts new streams.
+- Tooling: triggering a real browser download (even via keyboard) drops the automated browser page and no file lands on disk, so saved bytes are now verified by posting them to a local receiver instead.
+- No defects found; no code changes.
+
 ## Open issues / follow-ups
 
 - Switching documents very quickly logs a benign "Transport destroyed" console error from the previous viewer initialization.
