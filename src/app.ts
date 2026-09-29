@@ -59,7 +59,7 @@ export class LeaflineApp {
   private dirty = false;
   private pendingView: PendingView | null = null;
   private thumbs: Thumbnails;
-  private history: Uint8Array[] = [];
+  private history: { bytes: Uint8Array; dirty: boolean }[] = [];
   private loadingTask: ReturnType<typeof pdfjs.getDocument> | null = null;
   private docTask: ReturnType<typeof pdfjs.getDocument> | null = null;
   private busy = false;
@@ -356,7 +356,7 @@ export class LeaflineApp {
     this.setLoading(true, `${label}…`);
     try {
       const before = await this.currentBytes();
-      const snapshot = before.slice();
+      const snapshot = { bytes: before.slice(), dirty: this.dirty };
       const out = await fn(before);
       this.history.push(snapshot);
       if (this.history.length > 10) this.history.shift();
@@ -374,7 +374,7 @@ export class LeaflineApp {
   private async undoPageOp(): Promise<void> {
     const prev = this.history.pop();
     if (!prev || this.busy) return;
-    await this.load({ data: prev }, this.fileName, { page: this.viewer.currentPageNumber, scaleValue: this.fitted?.preset ?? this.viewer.currentScaleValue, dirty: true });
+    await this.load({ data: prev.bytes }, this.fileName, { page: this.viewer.currentPageNumber, scaleValue: this.fitted?.preset ?? this.viewer.currentScaleValue, dirty: prev.dirty });
     toast("Page change undone", "info");
   }
 
