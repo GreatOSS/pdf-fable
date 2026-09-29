@@ -342,6 +342,13 @@ Chromium via Playwright, dev server, `welcome.pdf` at zoom 1.19.
 - A text note dragged 149 px right and 80 px up: the saved `/Rect` moves from [162 441 219 464] to [288 508 345 531], i.e. +126 pt x and +67 pt y, matching the screen delta ÷ 1.19 with the PDF y-axis inverted. No console errors (one benign "Helv" font warning).
 - No defects found; no code changes.
 
+## 2026-09-29 — fifty-first session (text highlight on a /Rotate 90 page)
+
+Chromium via Playwright, dev server, `welcome.pdf` page 7.
+
+- The page's text renders vertically at the right edge of the landscape view; dragging along it with the highlight tool creates a highlight editor on page 7. Saved `/Highlight` has `/Rotate 90`, Rect [55 775 303 795] and quad points x 56–302, y 776–794: a horizontal line near the top of the unrotated 595×842 page, exactly where the rotated view's right-hand vertical line lives.
+- No defects found; no code changes.
+
 ## Open issues / follow-ups
 
 - Switching documents very quickly logs a benign "Transport destroyed" console error from the previous viewer initialization.
