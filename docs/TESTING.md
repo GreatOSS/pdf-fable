@@ -493,6 +493,13 @@ Emulated `forced-colors: active` on welcome.pdf with the sidebar open and page 2
 - **Bug:** the active tool button, the selected sidebar tab, the selected thumbnail and the current-page thumbnail all lost their tinted backgrounds, so none of these states were distinguishable. Fixed with a `@media (forced-colors: active)` block in `src/styles.css`: active tools and swatches get a `Highlight` outline, the selected tab and checked menu items are underlined, selected thumbnails get a 3px `Highlight` outline, the current thumbnail a 4px border, and toasts a `CanvasText` border.
 - Verified after the fix: computed styles differ for active vs inactive tool (2px outline vs none), selected vs current thumbnail (outline vs 4px border), and the active tab is underlined. Screenshot confirms the toolbar shows the select tool as active. Normal mode unaffected.
 
+### Seventy-third session (reduced motion and 320px reflow)
+
+Emulated `prefers-reduced-motion: reduce`, then a 640px viewport at 200% zoom (320 CSS px, the WCAG reflow width).
+
+- **Reflow:** the toolbar wraps onto four rows, nothing overflows horizontally (document width equals window width) and every control stays reachable. No change needed.
+- **Bug (minor):** the loading spinner kept its fast 0.8s continuous spin and toasts/thumbnail checkboxes kept their transitions under reduced motion. Added a `prefers-reduced-motion` block: spinner slows to a stepped 2.4s cycle, toast and checkbox transitions are disabled. Verified computed styles under both media states; normal mode unchanged.
+
 ## Open issues / follow-ups
 
 - Encrypted documents cannot have their password removed; merge/extract/split are refused on them (pdf-lib cannot re-encrypt).

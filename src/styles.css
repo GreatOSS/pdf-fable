@@ -257,3 +257,8 @@ li.collapsed > .outline-list { display: none; }
   [role="menuitemradio"][aria-checked="true"], [role="menuitemcheckbox"][aria-checked="true"] { text-decoration: underline; }
   .toast { border: 1px solid CanvasText; }
 }
+
+@media (prefers-reduced-motion: reduce) {
+  .spinner { animation-duration: 2.4s; animation-timing-function: steps(8); }
+  .toast, .thumb-check { transition: none; }
+}
