@@ -125,6 +125,10 @@ User-research note: recurring wishes for browser PDF tools are consistent annota
 
 - Dropping `second.pdf` onto the empty app (synthesized DragEvent with a File): the "Drop to open" overlay shows on drag-enter and hides after the drop; the 3-page document opens with its title.
 
+## 2026-09-29 — twenty-first session (unsaved-changes guard)
+
+- With an unsaved text note, opening another document prompts "You have unsaved changes. Discard them and open another document?". Declining keeps the note and the dirty state; accepting reloads the sample fresh (no editors, not dirty).
+
 Open issues / follow-ups:
 - Switching documents very quickly logs a benign "Transport destroyed" console error from the previous viewer initialization.
 - The delete icon of the PDF.js floating editor toolbar renders detached below its button in this build; the button itself works. Investigate CSS nesting/mask rules.
