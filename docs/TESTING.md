@@ -137,6 +137,10 @@ User-research note: recurring wishes for browser PDF tools are consistent annota
 
 - R / Shift+R rotate the view 90° each way without marking the document dirty. Fixed: the zoom preset was not re-fitted after rotation, leaving a 1px overflow and a horizontal scrollbar; presets now re-fit on rotation (verified no overflow at 90° and back at 0°).
 
+## 2026-09-29 — twenty-fourth session (production build)
+
+- `npm run build` + `vite preview` on port 4173: sample renders, worker and PDF.js assets (cmaps, fonts, wasm, images) load from the relative base with no failed requests, editor toolbar icons correct, free highlight created, console clean.
+
 Open issues / follow-ups:
 - Switching documents very quickly logs a benign "Transport destroyed" console error from the previous viewer initialization.
 - The delete icon of the PDF.js floating editor toolbar renders detached below its button in this build; the button itself works. Investigate CSS nesting/mask rules.
