@@ -364,6 +364,12 @@ Chromium via Playwright, dev server, `second.pdf` (A5); `window.print` stubbed t
 - Console: PDF.js "AnnotationBorderStyle.setWidth - ignoring width: 20" while loading the print copy, because the border width exceeds half the annotation's own rectangle; the stroke is drawn from its appearance stream, so this is benign.
 - No defects found; no code changes.
 
+## 2026-09-29 — fifty-fourth session (form values in print output)
+
+Chromium via Playwright, dev server, `welcome.pdf` page 6; `window.print` stubbed to sample the rasterised page.
+
+- Found and fixed: printed pages omitted form fields entirely (0 dark pixels in the Name field box before and after typing). The print renderer used annotation mode ENABLE_FORMS, which skips widgets on the assumption that an HTML form layer draws them. The print copy is loaded from the saved bytes, which already carry values and appearance streams, so it now renders with annotation mode ENABLE. After the fix the field border prints (1413 dark pixels) and typing "Ada Lovelace" adds the text (2783).
+
 ## Open issues / follow-ups
 
 - Switching documents very quickly logs a benign "Transport destroyed" console error from the previous viewer initialization.

@@ -21,7 +21,9 @@ export async function printDocument(
     const ctx = canvas.getContext("2d")!;
     ctx.fillStyle = "#fff";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
-    await page.render({ canvas, canvasContext: ctx, viewport, intent: "print", annotationMode: 2 }).promise;
+    // The print copy is loaded from the saved bytes, so form values already have appearance
+    // streams; annotationMode ENABLE (1) draws them. ENABLE_FORMS (2) would skip widgets.
+    await page.render({ canvas, canvasContext: ctx, viewport, intent: "print", annotationMode: 1 }).promise;
     const wrap = document.createElement("div");
     wrap.className = "print-page";
     const img = document.createElement("img");
