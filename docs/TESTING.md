@@ -129,6 +129,10 @@ User-research note: recurring wishes for browser PDF tools are consistent annota
 
 - With an unsaved text note, opening another document prompts "You have unsaved changes. Discard them and open another document?". Declining keeps the note and the dirty state; accepting reloads the sample fresh (no editors, not dirty).
 
+## 2026-09-29 — twenty-second session (page input)
+
+- Page number input: "5" jumps to page 5 and returns focus to the document; "99" clamps to the last page (7); "0" clamps to page 1.
+
 Open issues / follow-ups:
 - Switching documents very quickly logs a benign "Transport destroyed" console error from the previous viewer initialization.
 - The delete icon of the PDF.js floating editor toolbar renders detached below its button in this build; the button itself works. Investigate CSS nesting/mask rules.
