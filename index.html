@@ -1,0 +1,263 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="color-scheme" content="light dark" />
+    <meta name="description" content="Leafline — a fast, private, open-source PDF viewer and editor that runs entirely in your browser." />
+    <meta name="application-name" content="Leafline" />
+    <link rel="icon" href="./favicon.svg" type="image/svg+xml" />
+    <title>Leafline</title>
+  </head>
+  <body>
+    <div id="app" class="app" data-state="empty">
+      <header class="toolbar" role="toolbar" aria-label="Main toolbar">
+        <div class="toolbar-group">
+          <button class="tb" id="btnSidebar" data-icon="sidebar" title="Toggle sidebar (F4)" aria-label="Toggle sidebar" aria-pressed="false"></button>
+          <a class="brand" href="./" title="Leafline"><span class="brand-mark" aria-hidden="true"></span><span class="brand-name">Leafline</span></a>
+          <button class="tb" id="btnOpen" data-icon="open" title="Open PDF (Ctrl+O)" aria-label="Open PDF"></button>
+        </div>
+        <div class="toolbar-group doc-only">
+          <button class="tb" id="btnPrev" data-icon="up" title="Previous page" aria-label="Previous page"></button>
+          <div class="page-nav">
+            <input id="pageInput" type="number" min="1" value="1" aria-label="Page number" />
+            <span class="page-count">/ <span id="pageCount">0</span></span>
+          </div>
+          <button class="tb" id="btnNext" data-icon="down" title="Next page" aria-label="Next page"></button>
+        </div>
+        <div class="toolbar-group doc-only">
+          <button class="tb" id="btnZoomOut" data-icon="minus" title="Zoom out (Ctrl+-)" aria-label="Zoom out"></button>
+          <select id="zoomSelect" aria-label="Zoom">
+            <option value="auto">Automatic</option>
+            <option value="page-actual">Actual size</option>
+            <option value="page-fit">Fit page</option>
+            <option value="page-width">Fit width</option>
+            <option value="0.5">50%</option>
+            <option value="0.75">75%</option>
+            <option value="1">100%</option>
+            <option value="1.25">125%</option>
+            <option value="1.5">150%</option>
+            <option value="2">200%</option>
+            <option value="3">300%</option>
+            <option value="4">400%</option>
+            <option value="custom" hidden>—</option>
+          </select>
+          <button class="tb" id="btnZoomIn" data-icon="plus" title="Zoom in (Ctrl+=)" aria-label="Zoom in"></button>
+        </div>
+        <div class="toolbar-spacer"></div>
+        <div class="toolbar-group doc-only tools" role="radiogroup" aria-label="Tools">
+          <button class="tb tool" data-tool="select" data-icon="cursor" title="Select text (V)" aria-label="Select text" aria-pressed="true"></button>
+          <button class="tb tool" data-tool="hand" data-icon="hand" title="Pan (H)" aria-label="Pan"></button>
+          <span class="sep"></span>
+          <button class="tb tool" data-tool="highlight" data-icon="highlight" title="Highlight" aria-label="Highlight"></button>
+          <button class="tb tool" data-tool="freetext" data-icon="text" title="Add text" aria-label="Add text"></button>
+          <button class="tb tool" data-tool="ink" data-icon="pen" title="Draw" aria-label="Draw"></button>
+          <button class="tb tool" data-tool="stamp" data-icon="image" title="Add image" aria-label="Add image"></button>
+        </div>
+        <div class="toolbar-spacer"></div>
+        <div class="toolbar-group doc-only">
+          <button class="tb" id="btnFind" data-icon="search" title="Find (Ctrl+F)" aria-label="Find in document" aria-pressed="false"></button>
+          <button class="tb" id="btnRotate" data-icon="rotate" title="Rotate view (R)" aria-label="Rotate view"></button>
+          <button class="tb" id="btnSave" data-icon="save" title="Save (Ctrl+S)" aria-label="Save"><span class="dirty-dot" aria-hidden="true"></span></button>
+          <button class="tb" id="btnPrint" data-icon="print" title="Print (Ctrl+P)" aria-label="Print"></button>
+        </div>
+        <div class="toolbar-group">
+          <button class="tb" id="btnTheme" data-icon="moon" title="Toggle dark theme" aria-label="Toggle dark theme"></button>
+          <button class="tb" id="btnMenu" data-icon="more" title="More" aria-label="More options" aria-haspopup="menu" aria-expanded="false"></button>
+        </div>
+      </header>
+
+      <div class="editor-bar" id="editorBar" hidden>
+        <div class="editor-params" data-for="highlight">
+          <span class="param-label">Color</span>
+          <div class="swatches" data-param="HIGHLIGHT_COLOR">
+            <button class="swatch" style="--c:#FFFF98" data-value="#FFFF98" title="Yellow" aria-label="Yellow"></button>
+            <button class="swatch" style="--c:#53FFBC" data-value="#53FFBC" title="Green" aria-label="Green"></button>
+            <button class="swatch" style="--c:#80EBFF" data-value="#80EBFF" title="Blue" aria-label="Blue"></button>
+            <button class="swatch" style="--c:#FFCBE6" data-value="#FFCBE6" title="Pink" aria-label="Pink"></button>
+            <button class="swatch" style="--c:#FF4F5F" data-value="#FF4F5F" title="Red" aria-label="Red"></button>
+          </div>
+          <label class="param">Thickness <input type="range" min="8" max="24" value="12" data-param="HIGHLIGHT_THICKNESS" /></label>
+          <label class="param"><input type="checkbox" checked data-param="HIGHLIGHT_SHOW_ALL" /> Show all</label>
+          <span class="hint">Drag across text to highlight, or draw freely outside text.</span>
+        </div>
+        <div class="editor-params" data-for="freetext">
+          <label class="param">Color <input type="color" value="#000000" data-param="FREETEXT_COLOR" /></label>
+          <label class="param">Size <input type="range" min="6" max="48" value="12" data-param="FREETEXT_SIZE" /></label>
+          <span class="hint">Click on the page to place text. Press Escape when done.</span>
+        </div>
+        <div class="editor-params" data-for="ink">
+          <label class="param">Color <input type="color" value="#000000" data-param="INK_COLOR" /></label>
+          <label class="param">Thickness <input type="range" min="1" max="20" value="2" data-param="INK_THICKNESS" /></label>
+          <label class="param">Opacity <input type="range" min="1" max="100" value="100" data-param="INK_OPACITY" /></label>
+          <span class="hint">Draw on the page. Each stroke can be moved and resized.</span>
+        </div>
+        <div class="editor-params" data-for="stamp">
+          <button class="btn" id="btnAddImage">Add image…</button>
+          <span class="hint">Insert a PNG, JPEG, or SVG image, then drag it into place.</span>
+        </div>
+        <div class="editor-actions">
+          <button class="tb" id="btnUndo" data-icon="undo" title="Undo (Ctrl+Z)" aria-label="Undo" disabled></button>
+          <button class="tb" id="btnRedo" data-icon="redo" title="Redo (Ctrl+Shift+Z)" aria-label="Redo" disabled></button>
+          <button class="tb" id="btnEditorDone" data-icon="check" title="Done (Esc)" aria-label="Done editing"></button>
+        </div>
+      </div>
+
+      <div class="findbar" id="findbar" hidden role="search">
+        <input id="findInput" type="search" placeholder="Find in document…" aria-label="Find in document" autocomplete="off" />
+        <button class="tb" id="findPrev" data-icon="up" title="Previous match (Shift+Enter)" aria-label="Previous match"></button>
+        <button class="tb" id="findNext" data-icon="down" title="Next match (Enter)" aria-label="Next match"></button>
+        <label><input type="checkbox" id="findHighlightAll" checked /> Highlight all</label>
+        <label><input type="checkbox" id="findCase" /> Match case</label>
+        <label><input type="checkbox" id="findWord" /> Whole words</label>
+        <span id="findStatus" class="find-status" aria-live="polite"></span>
+        <button class="tb" id="findClose" data-icon="close" title="Close (Esc)" aria-label="Close find bar"></button>
+      </div>
+
+      <div class="body">
+        <aside class="sidebar" id="sidebar" aria-label="Sidebar" hidden>
+          <div class="sidebar-tabs" role="tablist">
+            <button class="sidebar-tab" role="tab" data-panel="pages" aria-selected="true">Pages</button>
+            <button class="sidebar-tab" role="tab" data-panel="outline" aria-selected="false">Outline</button>
+          </div>
+          <section class="sidebar-panel" id="panelPages" role="tabpanel">
+            <div class="pages-actions">
+              <div class="pages-actions-row" id="pagesSelectionBar" hidden>
+                <span id="selectionCount" class="selection-count"></span>
+                <button class="tb" id="pgRotateCcw" data-icon="rotateccw" title="Rotate selected pages left"></button>
+                <button class="tb" id="pgRotateCw" data-icon="rotate" title="Rotate selected pages right"></button>
+                <button class="tb" id="pgExtract" data-icon="export" title="Extract selected pages to a new PDF"></button>
+                <button class="tb danger" id="pgDelete" data-icon="trash" title="Delete selected pages"></button>
+                <button class="tb" id="pgClear" data-icon="close" title="Clear selection"></button>
+              </div>
+              <div class="pages-actions-row" id="pagesDefaultBar">
+                <button class="btn small" id="pgSelectAll">Select all</button>
+                <button class="btn small" id="pgInsertBlank" title="Insert a blank page after the current page">Blank page</button>
+                <button class="btn small" id="pgMerge" title="Append another PDF to this document">Merge PDF…</button>
+              </div>
+              <p class="pages-hint">Click a page to jump to it. Ctrl+click or use the checkboxes to select. Drag to reorder.</p>
+            </div>
+            <div class="thumbnails" id="thumbnails" role="list"></div>
+          </section>
+          <section class="sidebar-panel" id="panelOutline" role="tabpanel" hidden>
+            <div class="outline" id="outline"></div>
+          </section>
+        </aside>
+        <main class="viewer-wrap" id="viewerWrap">
+          <div id="viewerContainer" class="viewer-container" tabindex="0">
+            <div id="viewer" class="pdfViewer"></div>
+          </div>
+          <div class="welcome" id="welcome">
+            <div class="welcome-card">
+              <div class="welcome-logo" aria-hidden="true"></div>
+              <h1>Leafline</h1>
+              <p class="tagline">Read, annotate, and organize PDFs. Private by design: nothing leaves your device.</p>
+              <div class="welcome-actions">
+                <button class="btn primary large" id="welcomeOpen">Open a PDF</button>
+                <button class="btn large" id="welcomeSample">Try the sample</button>
+              </div>
+              <p class="welcome-hint">…or drop a PDF anywhere on this window.</p>
+            </div>
+          </div>
+          <div class="drop-overlay" id="dropOverlay" hidden><div>Drop to open</div></div>
+          <div class="loading" id="loading" hidden><div class="spinner"></div><span id="loadingText">Loading…</span></div>
+        </main>
+      </div>
+
+      <div class="menu" id="menu" role="menu" hidden>
+        <button role="menuitem" data-action="open">Open PDF…<kbd>Ctrl+O</kbd></button>
+        <button role="menuitem" data-action="open-url">Open from URL…</button>
+        <button role="menuitem" data-action="sample">Open sample document</button>
+        <hr />
+        <button role="menuitem" data-action="save" class="doc-only">Save<kbd>Ctrl+S</kbd></button>
+        <button role="menuitem" data-action="download" class="doc-only">Download a copy<kbd>Ctrl+Shift+S</kbd></button>
+        <button role="menuitem" data-action="print" class="doc-only">Print…<kbd>Ctrl+P</kbd></button>
+        <button role="menuitem" data-action="undo-pages" class="doc-only">Undo last page change<kbd>Ctrl+Z</kbd></button>
+        <hr class="doc-only" />
+        <div class="menu-section doc-only">Scrolling</div>
+        <button role="menuitemradio" data-action="scroll" data-value="0" class="doc-only">Vertical</button>
+        <button role="menuitemradio" data-action="scroll" data-value="1" class="doc-only">Horizontal</button>
+        <button role="menuitemradio" data-action="scroll" data-value="2" class="doc-only">Wrapped</button>
+        <button role="menuitemradio" data-action="scroll" data-value="3" class="doc-only">Single page</button>
+        <div class="menu-section doc-only">Spreads</div>
+        <button role="menuitemradio" data-action="spread" data-value="0" class="doc-only">No spreads</button>
+        <button role="menuitemradio" data-action="spread" data-value="1" class="doc-only">Odd spreads</button>
+        <button role="menuitemradio" data-action="spread" data-value="2" class="doc-only">Even spreads</button>
+        <hr class="doc-only" />
+        <button role="menuitem" data-action="rotate-ccw" class="doc-only">Rotate view left<kbd>Shift+R</kbd></button>
+        <button role="menuitem" data-action="rotate-cw" class="doc-only">Rotate view right<kbd>R</kbd></button>
+        <button role="menuitemcheckbox" data-action="invert" class="doc-only">Invert page colors</button>
+        <button role="menuitem" data-action="presentation" class="doc-only">Presentation mode<kbd>F5</kbd></button>
+        <hr class="doc-only" />
+        <button role="menuitem" data-action="properties" class="doc-only">Document properties…</button>
+        <button role="menuitem" data-action="shortcuts">Keyboard shortcuts<kbd>?</kbd></button>
+        <button role="menuitem" data-action="about">About Leafline</button>
+      </div>
+
+      <div class="toasts" id="toasts" aria-live="polite"></div>
+
+      <dialog id="dlgPassword" class="dialog">
+        <form method="dialog">
+          <h2>Password required</h2>
+          <p id="passwordMessage">This document is encrypted. Enter the password to open it.</p>
+          <input type="password" id="passwordInput" aria-label="Password" autocomplete="off" />
+          <div class="dialog-actions">
+            <button class="btn" value="cancel">Cancel</button>
+            <button class="btn primary" value="ok" id="passwordOk">Open</button>
+          </div>
+        </form>
+      </dialog>
+
+      <dialog id="dlgProps" class="dialog">
+        <form method="dialog">
+          <h2>Document properties</h2>
+          <dl id="propsList" class="props"></dl>
+          <div class="dialog-actions"><button class="btn primary" value="close">Close</button></div>
+        </form>
+      </dialog>
+
+      <dialog id="dlgUrl" class="dialog">
+        <form method="dialog">
+          <h2>Open from URL</h2>
+          <p>The server hosting the file must allow cross-origin requests.</p>
+          <input type="url" id="urlInput" placeholder="https://example.com/file.pdf" aria-label="PDF URL" />
+          <div class="dialog-actions">
+            <button class="btn" value="cancel">Cancel</button>
+            <button class="btn primary" value="ok">Open</button>
+          </div>
+        </form>
+      </dialog>
+
+      <dialog id="dlgShortcuts" class="dialog">
+        <form method="dialog">
+          <h2>Keyboard shortcuts</h2>
+          <table class="shortcuts">
+            <tr><td><kbd>Ctrl+O</kbd></td><td>Open a PDF</td><td><kbd>Ctrl+S</kbd></td><td>Save</td></tr>
+            <tr><td><kbd>Ctrl+F</kbd></td><td>Find</td><td><kbd>Enter</kbd> / <kbd>Shift+Enter</kbd></td><td>Next / previous match</td></tr>
+            <tr><td><kbd>Ctrl+=</kbd> / <kbd>Ctrl+-</kbd></td><td>Zoom in / out</td><td><kbd>Ctrl+0</kbd></td><td>Automatic zoom</td></tr>
+            <tr><td><kbd>Ctrl+wheel</kbd></td><td>Zoom at cursor</td><td><kbd>R</kbd> / <kbd>Shift+R</kbd></td><td>Rotate view</td></tr>
+            <tr><td><kbd>←</kbd> / <kbd>→</kbd></td><td>Previous / next page</td><td><kbd>Home</kbd> / <kbd>End</kbd></td><td>First / last page</td></tr>
+            <tr><td><kbd>V</kbd> / <kbd>H</kbd></td><td>Select / pan tool</td><td><kbd>Esc</kbd></td><td>Leave tool, close bars</td></tr>
+            <tr><td><kbd>Ctrl+Z</kbd> / <kbd>Ctrl+Shift+Z</kbd></td><td>Undo / redo annotation</td><td><kbd>Delete</kbd></td><td>Remove selected annotation</td></tr>
+            <tr><td><kbd>F4</kbd></td><td>Toggle sidebar</td><td><kbd>F5</kbd></td><td>Presentation mode</td></tr>
+            <tr><td><kbd>Ctrl+P</kbd></td><td>Print</td><td><kbd>?</kbd></td><td>This help</td></tr>
+          </table>
+          <div class="dialog-actions"><button class="btn primary" value="close">Close</button></div>
+        </form>
+      </dialog>
+
+      <dialog id="dlgAbout" class="dialog">
+        <form method="dialog">
+          <h2>Leafline <span id="aboutVersion" class="muted"></span></h2>
+          <p>An open-source PDF viewer and editor that runs entirely in your browser. Documents are processed locally and never uploaded.</p>
+          <p>Built on <a href="https://mozilla.github.io/pdf.js/" target="_blank" rel="noopener">PDF.js</a> and <a href="https://pdf-lib.js.org/" target="_blank" rel="noopener">pdf-lib</a>. Licensed under the MIT license.</p>
+          <div class="dialog-actions"><button class="btn primary" value="close">Close</button></div>
+        </form>
+      </dialog>
+    </div>
+    <div id="printContainer" aria-hidden="true"></div>
+    <input type="file" id="fileInput" accept="application/pdf,.pdf" hidden />
+    <input type="file" id="mergeInput" accept="application/pdf,.pdf" multiple hidden />
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
