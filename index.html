@@ -25,7 +25,7 @@
           </div>
           <button class="tb" id="btnNext" data-icon="down" title="Next page" aria-label="Next page"></button>
         </div>
-        <div class="toolbar-group doc-only">
+        <div class="toolbar-group doc-only zoom">
           <button class="tb" id="btnZoomOut" data-icon="minus" title="Zoom out (Ctrl+-)" aria-label="Zoom out"></button>
           <select id="zoomSelect" aria-label="Zoom">
             <option value="auto">Automatic</option>
@@ -55,7 +55,8 @@
           <button class="tb tool" data-tool="stamp" data-icon="image" title="Add image" aria-label="Add image"></button>
         </div>
         <div class="toolbar-spacer"></div>
-        <div class="toolbar-group doc-only">
+        <div class="toolbar-break doc-only" aria-hidden="true"></div>
+        <div class="toolbar-group doc-only actions">
           <button class="tb" id="btnFind" data-icon="search" title="Find (Ctrl+F)" aria-label="Find in document" aria-pressed="false"></button>
           <button class="tb" id="btnRotate" data-icon="rotate" title="Rotate view (R)" aria-label="Rotate view"></button>
           <button class="tb" id="btnSave" data-icon="save" title="Save (Ctrl+S)" aria-label="Save"><span class="dirty-dot" aria-hidden="true"></span></button>

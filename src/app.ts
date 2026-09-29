@@ -89,7 +89,11 @@ export class LeaflineApp {
     this.pdfHistory = new PDFHistory({ linkService: this.linkService, eventBus: this.eventBus });
     this.linkService.setHistory(this.pdfHistory);
     this.thumbs = new Thumbnails($("thumbnails"), {
-      onGoTo: (i) => { this.viewer.currentPageNumber = i + 1; this.container.focus(); },
+      onGoTo: (i) => {
+        this.viewer.currentPageNumber = i + 1;
+        if (window.innerWidth <= 720) this.setSidebar(false);
+        this.container.focus();
+      },
       onMove: (idx, before) => void this.movePages(idx, before),
       onSelectionChange: (sel) => this.onSelectionChange(sel),
     });
@@ -105,6 +109,12 @@ export class LeaflineApp {
     this.applyPrefs();
     $("aboutVersion").textContent = `v${VERSION}`;
     window.addEventListener("beforeunload", (e) => { if (this.dirty) { e.preventDefault(); } });
+    // The viewer component does not re-fit presets ("auto", "page-width", ...) when the window resizes.
+    window.addEventListener("resize", debounce(() => {
+      if (!this.pdf) return;
+      const preset = this.fitted?.preset ?? this.viewer.currentScaleValue;
+      if (!/^\d/.test(preset)) { this.fitted = null; this.viewer.currentScaleValue = preset; this.fitWidestPage(); }
+    }, 120));
     const params = new URLSearchParams(location.search);
     const file = params.get("file");
     if (file) void this.openUrl(file);

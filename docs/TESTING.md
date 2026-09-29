@@ -45,7 +45,17 @@ Tested with a 15-page arXiv paper (LaTeX/hyperref, 2.2 MB, nested outline):
 - New: navigation history. Alt+Left/Right (and the browser back/forward buttons) return from outline and link jumps without changing the URL. Verified 10 → 5 → 1 after two jumps.
 - No console errors or warnings on load.
 
+## 2026-09-29 — fourth session (narrow screens)
+
+Tested at 420×800 (phone-sized viewport) with the sample document:
+- Before: toolbar overflowed to 798px (tools, save, find, and the menu button off-screen), sidebar took half the width, welcome button label wrapped out of its box, and the document kept a horizontal scrollbar after resizing.
+- After: toolbar wraps into two rows (81px) with every control on-screen; below 480px the zoom select, print, and rotate buttons hide (still in the menu/keyboard); the sidebar overlays the document and closes after tapping a page; presets re-fit on window resize in both directions (verified container scrollWidth equals clientWidth at 420 and 1280).
+
+User-research note: recurring wishes for browser PDF tools are consistent annotation without subscriptions, speed on large files, stability, touch/pen support, dark mode, and reflow/reader mode. Touch pinch-zoom is not yet implemented.
+
 Open issues / follow-ups:
+- Touch: pinch-to-zoom gestures are not handled (only Ctrl+wheel / trackpad pinch). Consider pointer-event based pinch on the viewer container.
+- Resizing the window resets the scroll position to the top of the current page.
 - Switching documents very quickly logs a benign "Transport destroyed" console error from the previous viewer initialization.
 - The delete icon of the PDF.js floating editor toolbar renders detached below its button in this build; the button itself works. Investigate CSS nesting/mask rules.
 - Printing was not exercised in the headless browser.
