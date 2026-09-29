@@ -370,6 +370,13 @@ Chromium via Playwright, dev server, `welcome.pdf` page 6; `window.print` stubbe
 
 - Found and fixed: printed pages omitted form fields entirely (0 dark pixels in the Name field box before and after typing). The print renderer used annotation mode ENABLE_FORMS, which skips widgets on the assumption that an HTML form layer draws them. The print copy is loaded from the saved bytes, which already carry values and appearance streams, so it now renders with annotation mode ENABLE. After the fix the field border prints (1413 dark pixels) and typing "Ada Lovelace" adds the text (2783).
 
+## 2026-09-29 — fifty-fifth session (print regression: checkbox and ink together)
+
+Chromium via Playwright, dev server, `welcome.pdf` page 6, after the print render-mode change.
+
+- CI green on the print fix. Checked checkbox prints its check mark (105 dark pixels inside the box); a red ink stroke on the same page prints along the row derived from its saved Rect (506 red pixels of 1240). Form widgets and annotations both render under annotation mode ENABLE.
+- No defects found; no code changes.
+
 ## Open issues / follow-ups
 
 - Switching documents very quickly logs a benign "Transport destroyed" console error from the previous viewer initialization.
