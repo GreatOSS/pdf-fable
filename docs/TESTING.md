@@ -158,6 +158,14 @@ Chromium via Playwright, dev server, `arxiv.pdf` page 1.
 - Clicking the page margin clears the selection. Hand tool (`h`) drag pans the viewer and selects nothing; `v` returns to select.
 - No defects found; no code changes.
 
+## 2026-09-29 — twenty-seventh session (find: no match, wrap-around)
+
+Chromium via Playwright, dev server, `welcome.pdf`.
+
+- Searching a nonsense string shows "Phrase not found" in red beside the options; the input keeps focus and the clear button appears.
+- "Reading" gives "1 of 2 matches" and jumps to page 2; Enter → "2 of 2 matches"; Enter again wraps to "1 of 2 matches (wrapped)"; Shift+Enter wraps backwards to "2 of 2 matches (wrapped)".
+- No defects found; no code changes.
+
 ## Open issues / follow-ups
 
 - Switching documents very quickly logs a benign "Transport destroyed" console error from the previous viewer initialization.
