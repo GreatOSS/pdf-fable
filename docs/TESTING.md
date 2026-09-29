@@ -452,6 +452,12 @@ Chromium via Playwright, dev server, `welcome.pdf`.
 - CI green on the menu fix. Found and fixed: the sidebar tabs (role tab) ignored arrow keys, and the tool group was labelled a radio group while its buttons are `aria-pressed` toggles. Left/Right now move between and activate the sidebar tabs (with wrap-around, without leaking to page navigation) and step through the tools (select → hand → highlight…, wrapping to the image tool without opening its file chooser); the group role is now "group".
 - Verified: ArrowRight from Pages shows the Outline panel and focuses its tab; from the select tool ArrowRight twice selects the highlight tool with the right `aria-pressed` state; the current page stays 1 throughout.
 
+## 2026-09-29 — sixty-seventh session (dialog focus return)
+
+Chromium via Playwright, dev server, `arxiv.pdf`.
+
+- CI green on the tabs/tools keyboard fix. Dialogs are modal and open with focus inside (Properties focuses Close). Found and fixed: closing a dialog left focus on the document body. Dialogs now return focus to the element that opened them, and activating a menu item from the keyboard first returns focus to the menu button so the dialog has a live opener. Verified: Properties via keyboard menu → Escape → focus on the menu button; "?" from the viewer → Escape → focus back on the viewer; About via mouse → Escape → focus on the menu button.
+
 ## Open issues / follow-ups
 
 - Encrypted documents cannot have their password removed; merge/extract/split are refused on them (pdf-lib cannot re-encrypt).

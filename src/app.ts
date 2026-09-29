@@ -825,7 +825,11 @@ export class LeaflineApp {
     });
     document.addEventListener("click", (e) => { if (!menu.hidden && !menu.contains(e.target as Node)) close(); });
     menu.querySelectorAll<HTMLButtonElement>("button").forEach((b) => {
-      b.onclick = () => { close(); void this.menuAction(b.dataset.action!, b.dataset.value); };
+      b.onclick = () => {
+        // Keyboard activation: put focus back on the menu button so dialogs can return to it later.
+        close(menu.contains(document.activeElement));
+        void this.menuAction(b.dataset.action!, b.dataset.value);
+      };
     });
   }
 

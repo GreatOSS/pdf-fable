@@ -24,8 +24,14 @@ export function toast(message: string, kind: ToastKind = "info", ms = 3200): Toa
 /** Shows a <dialog> and resolves with its returnValue when it closes. */
 export function showDialog(id: string, onOpen?: (dlg: HTMLDialogElement) => void): Promise<string> {
   const dlg = document.getElementById(id) as HTMLDialogElement;
+  const opener = document.activeElement as HTMLElement | null;
   return new Promise((resolve) => {
-    const done = () => { dlg.removeEventListener("close", done); resolve(dlg.returnValue); };
+    const done = () => {
+      dlg.removeEventListener("close", done);
+      // Return focus to the element that opened the dialog (keyboard users lose their place otherwise).
+      if (opener?.isConnected && opener !== document.body) opener.focus();
+      resolve(dlg.returnValue);
+    };
     dlg.addEventListener("close", done);
     dlg.returnValue = "";
     onOpen?.(dlg);
