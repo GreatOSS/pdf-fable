@@ -117,6 +117,10 @@ User-research note: recurring wishes for browser PDF tools are consistent annota
 
 - Find "Attention" in the arXiv paper: 97 matches plain, 19 with Match case, 18 with Whole words added; Escape closes the bar, clears highlights, and returns focus to the document.
 
+## 2026-09-29 — nineteenth session (annotation undo/redo)
+
+- Text note → Delete key removes the selected editor → toolbar Undo restores it with its text → Redo removes it again; the toolbar buttons enable/disable correctly and the saved bytes reflect the final state (no FreeText left).
+
 Open issues / follow-ups:
 - Switching documents very quickly logs a benign "Transport destroyed" console error from the previous viewer initialization.
 - The delete icon of the PDF.js floating editor toolbar renders detached below its button in this build; the button itself works. Investigate CSS nesting/mask rules.
