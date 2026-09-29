@@ -820,21 +820,22 @@ export class LeaflineApp {
     const pdf = this.pdf;
     const [{ info, metadata }, dl, page] = await Promise.all([pdf.getMetadata(), pdf.getDownloadInfo(), pdf.getPage(1)]);
     const i = info as Record<string, unknown>;
+    const text = (v: unknown) => { const t = v == null ? "" : String(v).trim(); return t || "—"; };
     const fmtDate = (s: unknown) => { const d = typeof s === "string" ? pdfjs.PDFDateString.toDateObject(s) : null; return d ? d.toLocaleString() : "—"; };
     const vp = page.getViewport({ scale: 1 });
     const mm = (pt: number) => (pt * 25.4) / 72;
     const rows: [string, string][] = [
       ["File name", this.fileName],
       ["File size", formatBytes(dl.length)],
-      ["Title", String(metadata?.get("dc:title") ?? i.Title ?? "—")],
-      ["Author", String(i.Author ?? "—")],
-      ["Subject", String(i.Subject ?? "—")],
-      ["Keywords", String(i.Keywords ?? "—")],
+      ["Title", text(metadata?.get("dc:title") || i.Title)],
+      ["Author", text(i.Author)],
+      ["Subject", text(i.Subject)],
+      ["Keywords", text(i.Keywords)],
       ["Created", fmtDate(i.CreationDate)],
       ["Modified", fmtDate(i.ModDate)],
-      ["Application", String(i.Creator ?? "—")],
-      ["PDF producer", String(i.Producer ?? "—")],
-      ["PDF version", String(i.PDFFormatVersion ?? "—")],
+      ["Application", text(i.Creator)],
+      ["PDF producer", text(i.Producer)],
+      ["PDF version", text(i.PDFFormatVersion)],
       ["Pages", String(pdf.numPages)],
       ["Page size", `${mm(vp.width).toFixed(0)} × ${mm(vp.height).toFixed(0)} mm (${(vp.width / 72).toFixed(2)} × ${(vp.height / 72).toFixed(2)} in)`],
       ["Fast web view", i.IsLinearized ? "Yes" : "No"],

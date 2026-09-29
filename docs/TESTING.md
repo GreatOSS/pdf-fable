@@ -76,6 +76,11 @@ User-research note: recurring wishes for browser PDF tools are consistent annota
 
 - Dark theme and "Invert page colors" checked visually on the arXiv paper: UI contrast good, inverted pages readable, red text stays red-ish thanks to the hue rotation. Menu widened so "Download a copy" no longer wraps.
 
+## 2026-09-29 — tenth session (scroll modes, properties)
+
+- Single-page scroll mode: ArrowRight and PageDown advance one page at a time, only the current page is visible, and the mode persists across reloads.
+- Document properties dialog on the arXiv paper: file size, dates, producer, version, page count, and page size correct. Empty metadata fields showed blank; they now show "—".
+
 Open issues / follow-ups:
 - Resizing the window resets the scroll position to the top of the current page.
 - Switching documents very quickly logs a benign "Transport destroyed" console error from the previous viewer initialization.
