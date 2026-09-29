@@ -397,6 +397,13 @@ Chromium via Playwright, dev server, `second.pdf` (A5 portrait), view rotated 90
 
 - Found and changed: printing ignored the on-screen view rotation, unlike the PDF.js reference viewer. The print pipeline now adds the view rotation to each page's viewport. With the view rotated, the three pages rasterise at 1240×874 and print on 8.27×5.83 in landscape sheets; unrotated printing is unchanged (previous sessions).
 
+## 2026-09-29 — fifty-ninth session (print regression: /Rotate 90 page with view rotation 0)
+
+Chromium via Playwright, dev server, `welcome.pdf`, real print-to-PDF.
+
+- CI green on the print-rotation change. With the view unrotated, page 7 (stored /Rotate 90) still rasterises landscape (1753×1240) and its text sits in the right-hand strip of the sheet, matching the on-screen orientation; page 5 landscape, others portrait. The page's own rotation and the view rotation combine correctly.
+- No defects found; no code changes.
+
 ## Open issues / follow-ups
 
 - Switching documents very quickly logs a benign "Transport destroyed" console error from the previous viewer initialization.
