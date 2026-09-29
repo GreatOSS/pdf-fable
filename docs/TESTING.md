@@ -313,6 +313,13 @@ Chromium via Playwright, dev server, `welcome.pdf`.
 - Found and fixed: opacity was written as `/CA 50` (and `/CA 100` by default), outside the PDF range 0–1, and the stroke rendered fully opaque. The slider value is now divided by 100 before dispatch, matching PDF.js's own toolbar; the saved annotation now has `/CA 0.5` and the stroke renders translucent.
 - The thin frame that extends slightly past the page edge right after Escape is the ink editor's transient selection box; it disappears on the next click.
 
+## 2026-09-29 — forty-seventh session (text note colour and size parameters)
+
+Chromium via Playwright, dev server, `welcome.pdf`.
+
+- CI green on the ink-opacity fix. Text tool with colour #0000ff and size 24: the editor renders blue at 28.6 px (24 pt × 1.19 zoom) and the saved `/FreeText` has `/DA (/Helv 24 Tf 0 0 1 rg)` with the typed text present. Size slider range 6–48 needs no scaling, unlike ink opacity.
+- No defects found; no code changes.
+
 ## Open issues / follow-ups
 
 - Switching documents very quickly logs a benign "Transport destroyed" console error from the previous viewer initialization.
