@@ -261,6 +261,14 @@ Chromium via Playwright, dev server, `encrypted.pdf` (AES-256, user password "le
 - Tooling: triggering a real browser download (even via keyboard) drops the automated browser page and no file lands on disk, so saved bytes are now verified by posting them to a local receiver instead.
 - No defects found; no code changes.
 
+## 2026-09-29 — fortieth session (multi-page drag reorder)
+
+Chromium via Playwright, dev server, `welcome.pdf`, sidebar open, viewport enlarged so all thumbnails are visible.
+
+- Pages 1 and 3 selected via checkboxes, thumbnail 1 dragged onto the upper half of thumbnail 6: new order Reading, Organize, Landscape, Welcome, Annotate, Form fields, Rotated (i.e. the two pages inserted before the old page 6), toast "Moved 2 pages…", view jumps to the first moved page (4), selection cleared; Ctrl+Z restores the original order.
+- Tooling note: Playwright's `dragTo` scrolled the thumbnail list mid-drag and moved the wrong page; explicit mouse down/move/up with all thumbnails visible drives the HTML5 drag correctly.
+- No defects found; no code changes.
+
 ## Open issues / follow-ups
 
 - Switching documents very quickly logs a benign "Transport destroyed" console error from the previous viewer initialization.
