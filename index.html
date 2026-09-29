@@ -130,7 +130,7 @@
             <button class="sidebar-tab" role="tab" data-panel="outline" aria-selected="false">Outline</button>
           </div>
           <section class="sidebar-panel" id="panelPages" role="tabpanel">
-            <div class="pages-actions">
+            <div class="pages-actions doc-only">
               <div class="pages-actions-row" id="pagesSelectionBar" hidden>
                 <span id="selectionCount" class="selection-count"></span>
                 <button class="tb" id="pgRotateCcw" data-icon="rotateccw" title="Rotate selected pages left"></button>
@@ -146,9 +146,11 @@
               </div>
               <p class="pages-hint">Click a page to jump to it. Ctrl+click or use the checkboxes to select. Drag to reorder.</p>
             </div>
+            <p class="sidebar-empty" id="pagesEmpty">Open a document to see its pages here.</p>
             <div class="thumbnails" id="thumbnails" role="list"></div>
           </section>
           <section class="sidebar-panel" id="panelOutline" role="tabpanel" hidden>
+            <p class="sidebar-empty" id="outlineEmpty">Open a document to see its outline here.</p>
             <div class="outline" id="outline"></div>
           </section>
         </aside>

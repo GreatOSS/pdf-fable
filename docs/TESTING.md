@@ -535,6 +535,16 @@ Filled every field type on the welcome form page (text "Ada Lovelace", checkbox,
 - Saved bytes checked with pypdf: page 1 /Rotate 90, field values name/agree=/Yes/theme=/1/language=Deutsch, checkbox and radio /AS states correct, and the text and dropdown widgets carry fresh appearance streams containing the typed text, so viewers that do not regenerate appearances will show the values.
 - No console errors. No product problems found.
 
+### Seventy-eighth session (welcome screen and drag-and-drop opening)
+
+Started from a fresh tab as a first-time user and opened files by drag and drop.
+
+- **Welcome screen:** title, tagline, "Open a PDF", "Try the sample" and the drop hint all present.
+- **Drop overlay:** appears on dragenter with "Drop to open", survives nested enter/leave pairs, hides after the last leave, and does not appear for plain text drags.
+- **Drop:** a dropped PDF opens (title and page count update); dropping the same file again reloads cleanly; a `.txt` drop shows "Drop a PDF file to open it." and keeps the current document.
+- **Unsaved changes guard:** with a fresh text note, dropping another PDF asks "You have unsaved changes. Discard them and open another document?". Accepting opens the new file; cancelling (confirm stubbed to false, since the browser harness auto-accepts native dialogs) keeps the document, the note and the dirty flag.
+- **Rough edge fixed:** with no document open the sidebar still showed "Select all / Blank page / Merge PDF…" and the "Click a page to jump to it" hint, none of which could do anything. The page tools now hide in the empty state and both panels show a short "Open a document to see its pages/outline here." hint; verified on the welcome screen and after opening the sample (tools back, hints gone, "no outline" message intact).
+
 ## Open issues / follow-ups
 
 - Encrypted documents cannot have their password removed; merge/extract/split are refused on them (pdf-lib cannot re-encrypt).

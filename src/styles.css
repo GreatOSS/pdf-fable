@@ -42,6 +42,8 @@ a { color: var(--accent); }
 
 .app { display: flex; flex-direction: column; height: 100%; }
 .app[data-state="empty"] .doc-only { display: none !important; }
+.sidebar-empty { display: none; margin: 16px 12px; color: var(--muted); font-size: 13px; }
+.app[data-state="empty"] .sidebar-empty { display: block; }
 
 /* Toolbar */
 .toolbar { display: flex; align-items: center; gap: 4px; height: var(--toolbar-h); padding: 0 8px; background: var(--bg-toolbar); border-bottom: 1px solid var(--border); backdrop-filter: blur(8px); flex: none; z-index: 5; }
