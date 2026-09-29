@@ -156,9 +156,9 @@ li.collapsed > .outline-list { display: none; }
 @keyframes spin { to { transform: rotate(360deg); } }
 
 /* Menu */
-.menu { position: fixed; top: calc(var(--toolbar-h) + 2px); right: 8px; width: 260px; max-height: calc(100vh - 60px); overflow: auto; background: var(--bg-elev); border: 1px solid var(--border); border-radius: 10px; box-shadow: var(--shadow); padding: 6px; z-index: 50; }
+.menu { position: fixed; top: calc(var(--toolbar-h) + 2px); right: 8px; width: 290px; max-height: calc(100vh - 60px); overflow: auto; background: var(--bg-elev); border: 1px solid var(--border); border-radius: 10px; box-shadow: var(--shadow); padding: 6px; z-index: 50; }
 .menu[hidden] { display: none; }
-.menu button { display: flex; align-items: center; width: 100%; padding: 7px 10px; border: 0; background: none; text-align: left; border-radius: 6px; cursor: pointer; gap: 8px; }
+.menu button { display: flex; align-items: center; width: 100%; padding: 7px 10px; border: 0; background: none; text-align: left; border-radius: 6px; cursor: pointer; gap: 8px; white-space: nowrap; }
 .menu button:hover { background: color-mix(in srgb, var(--fg) 7%, transparent); }
 .menu button kbd { margin-left: auto; }
 .menu button[aria-checked="true"]::before { content: "✓"; color: var(--accent); width: 14px; margin-left: -4px; }
