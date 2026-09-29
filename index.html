@@ -8,6 +8,14 @@
     <meta name="application-name" content="Leafline" />
     <link rel="icon" href="./favicon.svg" type="image/svg+xml" />
     <title>Leafline</title>
+    <script>
+      // Apply the saved theme before first paint to avoid a light flash for dark-theme users.
+      try {
+        var t = JSON.parse(localStorage.getItem("leafline.theme") || "null");
+        if (t !== "light" && t !== "dark") t = matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+        document.documentElement.dataset.theme = t;
+      } catch (e) { /* storage unavailable: the app applies the theme on load */ }
+    </script>
   </head>
   <body>
     <div id="app" class="app" data-state="empty">

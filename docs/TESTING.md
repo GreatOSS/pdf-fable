@@ -283,6 +283,13 @@ Chromium via Playwright, dev server, `welcome.pdf` open; `encrypted.pdf` injecte
 - Toast "Page change failed: The file to merge is password-protected; remove its password first."; document unchanged (7 pages), not dirty, no undo entry, no password prompt, loading overlay hidden. Console shows only the app's own logged error for the failed operation.
 - No defects found; no code changes.
 
+## 2026-09-29 — forty-third session (dark theme persistence; flash of light theme)
+
+Chromium via Playwright, dev server, `welcome.pdf`.
+
+- Theme button switches to dark (background rgb(27,29,28), title "Switch to light theme"), preference stored as `leafline.theme`, and the dark theme is restored on reload.
+- Found and fixed: the theme was applied only by the deferred app module, so dark-theme users saw a light flash on every load. A tiny inline script in the head now sets `data-theme` from the stored preference (or the system preference) before first paint. Verified with an init-script observer that the attribute is already "dark" when the body element appears, before the app module runs.
+
 ## Open issues / follow-ups
 
 - Switching documents very quickly logs a benign "Transport destroyed" console error from the previous viewer initialization.
