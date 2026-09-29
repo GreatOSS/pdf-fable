@@ -269,6 +269,13 @@ Chromium via Playwright, dev server, `welcome.pdf`, sidebar open, viewport enlar
 - Tooling note: Playwright's `dragTo` scrolled the thumbnail list mid-drag and moved the wrong page; explicit mouse down/move/up with all thumbnails visible drives the HTML5 drag correctly.
 - No defects found; no code changes.
 
+## 2026-09-29 — forty-first session (delete-all guard)
+
+Chromium via Playwright, dev server, `second.pdf` (3 pages).
+
+- Select all → Delete: error toast "A document must keep at least one page."; document unchanged (3 pages), not dirty, no undo entry, selection still "3 selected", loading overlay hidden, app not busy.
+- No defects found; no code changes.
+
 ## Open issues / follow-ups
 
 - Switching documents very quickly logs a benign "Transport destroyed" console error from the previous viewer initialization.
