@@ -290,6 +290,13 @@ Chromium via Playwright, dev server, `welcome.pdf`.
 - Theme button switches to dark (background rgb(27,29,28), title "Switch to light theme"), preference stored as `leafline.theme`, and the dark theme is restored on reload.
 - Found and fixed: the theme was applied only by the deferred app module, so dark-theme users saw a light flash on every load. A tiny inline script in the head now sets `data-theme` from the stored preference (or the system preference) before first paint. Verified with an init-script observer that the attribute is already "dark" when the body element appears, before the app module runs.
 
+## 2026-09-29 — forty-fourth session (theme script in the production build)
+
+Chromium via Playwright, `vite preview` on port 4173.
+
+- CI green on the theme fix. The built `index.html` keeps the inline theme script in the head ahead of the hoisted module script and the body. With the dark preference stored, `data-theme` is already "dark" at DOMContentLoaded and the sample loads normally (7 pages, title set).
+- No defects found; no code changes.
+
 ## Open issues / follow-ups
 
 - Switching documents very quickly logs a benign "Transport destroyed" console error from the previous viewer initialization.
