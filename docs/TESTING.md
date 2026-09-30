@@ -836,6 +836,12 @@ A throttled local HTTP server (64 KB every 250 ms, CORS enabled) served the samp
 - Rough edge: switching away from the 600-page document produced ~190 console errors ("Unable to get page N to initialize viewer: Transport destroyed"). Cause: after a successful load the loading task was also the displayed document's task, so the next open destroyed the live transport while the viewer was still fetching its pages. **Fixed**: only an unfinished load is aborted at the start of a new one, and the replaced document is destroyed once the viewer's page loop has drained (5 s cap). After the fix: five switches, including leaving the 600-page document 200 ms after it opened and two opens 150 ms apart, logged zero errors; heap back at 23 MB; new document renders.
 - `npm run check`: 15 tests, build OK.
 
+## Hundred-and-twelfth session (page-operation stress on 600 pages)
+
+`big.pdf`: rotate page 300, delete it, insert a blank after 299, three undos, rotate page 1, delete two pages, two more undos — each operation 0.3–0.7 s, page count back to 600, undo stack empty, heap 22 MB, zero console errors (the deferred teardown from session 111 holds under repeated reloads).
+- One console warning surfaced: the page input was set to "NaN" when Delete was triggered with an empty selection (only reachable programmatically, since the selection bar hides without a selection); the app still reloaded the unchanged bytes and recorded an undo entry. **Fixed**: rotate and delete return early without a selection. Verified: programmatic clicks with nothing selected leave the document, busy flag and history untouched; a real single-page delete still works (page input "2", undo toast).
+- `npm run check`: 15 tests, build OK.
+
 ## Open issues / follow-ups
 
 - Encrypted documents cannot have their password removed; merge/extract/split are refused on them (pdf-lib cannot re-encrypt).

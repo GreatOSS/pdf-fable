@@ -875,11 +875,13 @@ export class LeaflineApp {
     const sel = () => this.thumbs.selection;
     $("pgSelectAll").onclick = () => this.thumbs.selectAll();
     $("pgClear").onclick = () => this.thumbs.clearSelection();
-    const rotate = (deg: number) => { const s = sel(); void this.applyPageOp(`Rotated ${s.length} page(s)`, (b) => ops.rotatePages(b, s, deg), undefined, s); };
+    // The selection bar hides when nothing is selected; the guard keeps programmatic clicks from reloading for nothing.
+    const rotate = (deg: number) => { const s = sel(); if (!s.length) return; void this.applyPageOp(`Rotated ${s.length} page(s)`, (b) => ops.rotatePages(b, s, deg), undefined, s); };
     $("pgRotateCw").onclick = () => rotate(90);
     $("pgRotateCcw").onclick = () => rotate(-90);
     $("pgDelete").onclick = () => {
       const s = sel();
+      if (!s.length) return;
       if (s.length >= this.viewer.pagesCount) { toast("A document must keep at least one page.", "error"); return; }
       if (s.length > 1 && !confirmDialog(`Delete ${s.length} pages?`)) return;
       void this.applyPageOp(`Deleted ${s.length} page(s)`, (b) => ops.deletePages(b, s), Math.max(1, Math.min(s[0] + 1, this.viewer.pagesCount - s.length)));
