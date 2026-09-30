@@ -728,6 +728,14 @@ Set the ink colour picker to #C0392B, thickness 12 and opacity 40, drew a zig-za
 - **UI:** the swatch bar marks the active colour; the highlight thickness slider (free highlight) and "Show all" checkbox are present; the stroke renders translucent and thick on the page.
 - No console errors. No product problems found.
 
+### Hundredth session (free-text colour, size, re-styling and moving)
+
+Set the text colour to #1A5FB4 and size 24, typed "Big blue note", then selected the note, changed it to size 14 and #C01C28, and dragged it 120 × 60 px.
+
+- **Live:** the editor rendered blue at 35.5 px (24 pt × 1.48 zoom) on creation, then red at 20.7 px after re-styling the selected note; the drag moved it by exactly the mouse delta.
+- **Saved bytes (pypdf):** one FreeText "Big blue note", /DA "/Helv 14 Tf 0.75 0.11 0.16 rg" (red, 14 pt), the same font size and colour in the appearance stream, at the moved rectangle.
+- No console errors. No product problems found.
+
 ## Open issues / follow-ups
 
 - Encrypted documents cannot have their password removed; merge/extract/split are refused on them (pdf-lib cannot re-encrypt).
