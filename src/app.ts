@@ -215,6 +215,8 @@ export class LeaflineApp {
     bus.on("annotationeditoruimanager", ({ uiManager }: { uiManager: unknown }) => { this.uiManager = uiManager; });
     bus.on("annotationeditormodechanged", ({ mode }: { mode: number }) => {
       if (mode === EditorType.NONE && TOOL_MODE[this.tool] !== EditorType.NONE) this.setTool("select");
+      // A stroke committed while leaving a drawing tool stays selected (floating toolbar included); clear it.
+      if (mode === EditorType.NONE) this.uiManager?.unselectAll?.();
       // The image picker must open only once the layer is really in stamp mode (the switch can be deferred).
       if (mode === EditorType.STAMP && this.pendingStampPicker) { this.pendingStampPicker = false; this.dispatchParam("CREATE", null); }
     });
@@ -470,12 +472,17 @@ export class LeaflineApp {
   }
 
   // ---------- Tools ----------
+  /** The viewer's getter returns the mode number at runtime even though its type says otherwise. */
+  private editorMode(): number {
+    return this.viewer.annotationEditorMode as unknown as number;
+  }
+
   private setTool(tool: Tool): void {
     this.tool = tool;
     document.querySelectorAll<HTMLButtonElement>(".tool").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.tool === tool)));
     this.container.classList.toggle("hand", tool === "hand");
     const mode = TOOL_MODE[tool];
-    if (this.pdf && this.uiManager && this.viewer.annotationEditorMode.mode !== mode) {
+    if (this.pdf && this.uiManager && this.editorMode() !== mode) {
       try {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (this.viewer as any).annotationEditorMode = { mode };
@@ -502,7 +509,7 @@ export class LeaflineApp {
 
   /** Open the stamp editor's file picker, waiting for the mode switch when PDF.js defers it. */
   private openImagePicker(): void {
-    if (this.viewer.annotationEditorMode.mode === EditorType.STAMP) { this.pendingStampPicker = false; this.dispatchParam("CREATE", null); return; }
+    if (this.editorMode() === EditorType.STAMP) { this.pendingStampPicker = false; this.dispatchParam("CREATE", null); return; }
     this.pendingStampPicker = true;
   }
 

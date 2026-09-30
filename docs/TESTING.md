@@ -792,6 +792,16 @@ Fixture: page 2 of `samples/annots.pdf` (pypdf FreeText, red Helvetica 12 pt, re
 - Harness note: text near the bottom edge of the viewport (span top at 712 of 720) cannot be dragged; scroll the span into view first.
 - No product problems found.
 
+## Hundred-and-seventh session (highlight from another tool; editor selection after leaving a tool)
+
+Fixture: `samples/highlight.pdf` (arXiv page 1 with a pypdf yellow highlight over the title, author "Ada", contents "Great title").
+
+- Renders from QuadPoints (yellow pixels on the canvas). Highlight tool: the annotation swaps to an editor at the same spot; clicking selects it with the floating toolbar; picking the green swatch recolours it. Saved: `/C` green, `/M` set, fresh `/AP`, `/T` and `/Contents` kept. Delete key removes it (annotation absent from the saved bytes); Ctrl+Z restores it.
+- Rough edge: after drawing an ink stroke and switching back to Select, the stroke stayed selected with its floating colour/delete toolbar (PDF.js commits the drawing session after its own unselect). **Fixed**: the app unselects all editors once the mode change to none is confirmed. Verified for ink and for the existing highlight (0 selected editors, toolbar hidden).
+- Also fixed: two comparisons read `annotationEditorMode.mode`, but PDF.js returns the number itself (its type says otherwise), so the checks were always false. Verified the stamp flow still works: stamp tool opens the picker, cancelling and pressing "Add image" opens it again, clicking the active stamp tool returns to Select.
+- Harness note: a picker stub that swallows the click without dispatching `cancel` leaves an empty stamp editor that breaks saving (`addButton of null`); dispatch `cancel` on the input in stubs.
+- `npm run check`: 12 tests, build OK.
+
 ## Open issues / follow-ups
 
 - Encrypted documents cannot have their password removed; merge/extract/split are refused on them (pdf-lib cannot re-encrypt).
