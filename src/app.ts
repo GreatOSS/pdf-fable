@@ -131,8 +131,13 @@ export class LeaflineApp {
 
   private setTheme(theme: "light" | "dark"): void {
     document.documentElement.dataset.theme = theme;
-    $("btnTheme").innerHTML = icon(theme === "dark" ? "sun" : "moon");
-    $("btnTheme").title = theme === "dark" ? "Switch to light theme" : "Switch to dark theme";
+    const btn = $("btnTheme");
+    btn.innerHTML = icon(theme === "dark" ? "sun" : "moon");
+    btn.dataset.icon = theme === "dark" ? "sun" : "moon";
+    // The spoken name must follow the visible tooltip, and a toggle exposes its state.
+    btn.title = theme === "dark" ? "Switch to light theme" : "Switch to dark theme";
+    btn.setAttribute("aria-label", btn.title);
+    btn.setAttribute("aria-pressed", String(theme === "dark"));
     prefs.set("theme", theme);
   }
 

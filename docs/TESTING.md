@@ -697,6 +697,13 @@ Opened the shortcuts dialog with `?` on the 60-page document and pressed every d
 - **Dialog completed:** it did not list PgDn / PgUp / Space (single-page paging), Ctrl+A (select document text) or Ctrl+Z as page-change undo outside editing, and the annotation undo row did not say it applies while editing. Added those; the dialog still fits a 720 px viewport (546 px tall).
 - No console errors.
 
+### Ninety-sixth session (About dialog, unload guard, theme button semantics)
+
+- **About:** shows "Leafline v0.1.0" (from package.json), the local-processing statement, PDF.js and pdf-lib links with `target="_blank" rel="noopener"`, and a Close button; Escape closes it.
+- **Unload guard:** a synthetic `beforeunload` is not cancelled on a clean document and is cancelled once an ink stroke makes it dirty, so the browser's leave-page prompt appears only with unsaved changes.
+- **Accessibility fix:** the theme button's spoken name stayed "Toggle dark theme" in both states (only the tooltip changed) and its icon attribute went stale. It now carries the same text as its tooltip ("Switch to dark theme" / "Switch to light theme"), `aria-pressed` reflecting dark mode, and the matching icon name; verified across toggle, reload (dark persisted) and toggle back. In dark mode the button shows the pressed tint with the sun icon.
+- No console errors.
+
 ## Open issues / follow-ups
 
 - Encrypted documents cannot have their password removed; merge/extract/split are refused on them (pdf-lib cannot re-encrypt).
