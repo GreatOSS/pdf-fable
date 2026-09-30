@@ -164,13 +164,19 @@ li.collapsed > .outline-list { display: none; }
 /* Menu */
 .menu { position: fixed; top: calc(var(--toolbar-h) + 2px); right: 8px; width: 290px; max-height: calc(100vh - 60px); overflow: auto; background: var(--bg-elev); border: 1px solid var(--border); border-radius: 10px; box-shadow: var(--shadow); padding: 6px; z-index: 50; }
 .menu[hidden] { display: none; }
-.menu button { display: flex; align-items: center; width: 100%; padding: 7px 10px; border: 0; background: none; text-align: left; border-radius: 6px; cursor: pointer; gap: 8px; white-space: nowrap; }
+.menu button { display: flex; align-items: center; width: 100%; padding: 6px 10px; border: 0; background: none; text-align: left; border-radius: 6px; cursor: pointer; gap: 8px; white-space: nowrap; }
 .menu button:hover { background: color-mix(in srgb, var(--fg) 7%, transparent); }
 .menu button kbd { margin-left: auto; }
 .menu button[aria-checked="true"]::before { content: "✓"; color: var(--accent); width: 14px; margin-left: -4px; }
 .menu button[role="menuitemradio"], .menu button[role="menuitemcheckbox"] { padding-left: 24px; }
 .menu button[role="menuitemradio"][aria-checked="true"], .menu button[role="menuitemcheckbox"][aria-checked="true"] { padding-left: 10px; }
 .menu hr { border: 0; border-top: 1px solid var(--border); margin: 6px 0; }
+/* Radio groups as one row of chips: the menu must fit a laptop screen without scrolling. */
+.menu-choices { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; padding: 4px 8px; }
+.menu-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--fg-muted); margin-right: 4px; }
+.menu .menu-choices button { width: auto; padding: 4px 11px; border: 1px solid var(--border); border-radius: 999px; font-size: 13px; }
+.menu .menu-choices button::before { content: none; }
+.menu .menu-choices button[aria-checked="true"] { background: var(--accent-soft); color: var(--accent); border-color: var(--accent); font-weight: 600; }
 .menu-section { font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--fg-muted); padding: 6px 10px 2px; }
 
 /* Toasts */

@@ -186,15 +186,19 @@
         <button role="menuitem" data-action="split" class="doc-only">Split into single pages (ZIP)</button>
         <button role="menuitem" data-action="undo-pages" class="doc-only">Undo last page change<kbd>Ctrl+Z</kbd></button>
         <hr class="doc-only" />
-        <div class="menu-section doc-only">Scrolling</div>
-        <button role="menuitemradio" data-action="scroll" data-value="0" class="doc-only">Vertical</button>
-        <button role="menuitemradio" data-action="scroll" data-value="1" class="doc-only">Horizontal</button>
-        <button role="menuitemradio" data-action="scroll" data-value="2" class="doc-only">Wrapped</button>
-        <button role="menuitemradio" data-action="scroll" data-value="3" class="doc-only">Single page</button>
-        <div class="menu-section doc-only">Spreads</div>
-        <button role="menuitemradio" data-action="spread" data-value="0" class="doc-only">No spreads</button>
-        <button role="menuitemradio" data-action="spread" data-value="1" class="doc-only">Odd spreads</button>
-        <button role="menuitemradio" data-action="spread" data-value="2" class="doc-only">Even spreads</button>
+        <div class="menu-choices doc-only" role="group" aria-label="Scrolling">
+          <span class="menu-label" aria-hidden="true">Scrolling</span>
+          <button role="menuitemradio" data-action="scroll" data-value="0">Vertical</button>
+          <button role="menuitemradio" data-action="scroll" data-value="1">Horizontal</button>
+          <button role="menuitemradio" data-action="scroll" data-value="2">Wrapped</button>
+          <button role="menuitemradio" data-action="scroll" data-value="3">Single page</button>
+        </div>
+        <div class="menu-choices doc-only" role="group" aria-label="Spreads">
+          <span class="menu-label" aria-hidden="true">Spreads</span>
+          <button role="menuitemradio" data-action="spread" data-value="0">None</button>
+          <button role="menuitemradio" data-action="spread" data-value="1">Odd</button>
+          <button role="menuitemradio" data-action="spread" data-value="2">Even</button>
+        </div>
         <hr class="doc-only" />
         <button role="menuitem" data-action="rotate-ccw" class="doc-only">Rotate view left<kbd>Shift+R</kbd></button>
         <button role="menuitem" data-action="rotate-cw" class="doc-only">Rotate view right<kbd>R</kbd></button>

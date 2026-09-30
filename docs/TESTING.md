@@ -856,6 +856,12 @@ A throttled local HTTP server (64 KB every 250 ms, CORS enabled) served the samp
 - `welcome.pdf` → `welcome-pages.zip` (14.8 KB): Python's zipfile validates it; 7 entries `welcome-page-1.pdf` … `-7.pdf`, each 1 page; page 6 keeps its form fields (name, agree, …); page 7 keeps `/Rotate 90`. Toast "Split into 7 single-page file(s)", overlay hidden, app not busy.
 - `big.pdf` (600 pages) → `big-pages.zip` (1.0 MB, names zero-padded to `-page-001`) in about 0.5 s.
 
+## Hundred-and-fifteenth session (menu height on laptop screens)
+
+- Rough edge: with the split item added the menu had 22 rows (~845 px) and scrolled even at 1280×720; the last item sat 185 px below the fold. **Fixed**: the Scrolling and Spreads radio groups are now one row of chips each with an inline label (still `menuitemradio`, arrow keys walk through them, Enter picks), and row padding went from 7 to 6 px. Menu height 642 px: fits 720 px screens without scrolling; on 375×667 and 1024×500 it scrolls as before (max-height keeps it on screen).
+- Keyboard: ArrowDown walks all 21 items to "About Leafline"; Enter on "Wrapped" sets scroll mode 2 and closes the menu; reopening shows the chip checked. Chips checked in light and dark themes look right (screenshots).
+- `npm run check`: 19 tests, build OK.
+
 ## Open issues / follow-ups
 
 - Encrypted documents cannot have their password removed; merge/extract/split are refused on them (pdf-lib cannot re-encrypt).
