@@ -689,6 +689,14 @@ Used the Open from URL dialog with bad, blocked, missing, non-PDF and good addre
 - **Messages improved:** a cross-origin or unreachable address used to say "Failed to fetch", and a non-PDF URL was reported as a damaged file named "favicon.svg.pdf". Now: `Could not download "x". The server may not allow cross-origin access, or the address is unreachable.`; `"favicon.svg" is not a PDF file.` (the original name is used in messages; ".pdf" is still appended for saving); and on a real static server a missing file gives `Could not find "nope.pdf".` (verified with a plain HTTP server on the built `dist/`; the dev server answers unknown paths with HTML, so there it reads "not a PDF file"). On failure the app fetches the first kilobyte of the URL to tell these cases apart.
 - After each failure the welcome screen stays usable and the next open works.
 
+### Ninety-fifth session (keyboard shortcuts dialog vs. actual behaviour)
+
+Opened the shortcuts dialog with `?` on the 60-page document and pressed every documented key.
+
+- **Verified:** ← / → page 1 → 2 → 1, End 60, Home 1, Ctrl+= 1.207 → 1.4, Ctrl+- back to 1.2, Ctrl+0 Automatic, R rotates 90 and Shift+R back, H/V switch pan/select, Ctrl+F and Ctrl+G open find, ? opens the dialog (focus on Close, Escape closes), F4 hides and shows the sidebar, Delete removes a selected annotation and Ctrl+Z restores it. All match the dialog.
+- **Dialog completed:** it did not list PgDn / PgUp / Space (single-page paging), Ctrl+A (select document text) or Ctrl+Z as page-change undo outside editing, and the annotation undo row did not say it applies while editing. Added those; the dialog still fits a 720 px viewport (546 px tall).
+- No console errors.
+
 ## Open issues / follow-ups
 
 - Encrypted documents cannot have their password removed; merge/extract/split are refused on them (pdf-lib cannot re-encrypt).
