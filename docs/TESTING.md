@@ -712,6 +712,14 @@ Drew an ink stroke on page 2, typed a note on page 3 and highlighted a word on p
 - **After reorder:** "Organize pages" leads with its highlight, followed by "Reading" with the ink and "Annotate" with the note; the remaining pages keep their order and the form page keeps its widgets.
 - Both operations showed their undo toasts; no console errors.
 
+### Ninety-eighth session (window resizing with a document open)
+
+Resized the window from 1280 px down to 380 px and back with the 60-page document on page 25 and the sidebar open.
+
+- **Fit and position:** Automatic zoom re-fits at every width (1.207 → 0.987 → 0.79 → … → 0.398 and back), never with horizontal overflow, and page 25 stays current. Below 720 px the toolbar wraps to two rows and the sidebar becomes an overlay; at 380 px nothing overflows the window and the page box stays visible.
+- **Rough edge fixed:** narrowing the window left the open sidebar overlaying and hiding the document, and on a narrow screen a saved "sidebar open" preference opened the overlay at startup. Now crossing the 720 px breakpoint closes the sidebar (and reopens it when widening if the reader prefers it open), a narrow startup begins closed, and a thumbnail tap or the automatic close no longer overwrites the preference; the reader can still open it manually on a phone-sized window. Verified: 1280 open → 600 closed (pref kept) → 1280 open; manual open at 600, thumbnail tap to page 4 closes it, widening reopens; 380 px reload starts closed; the toggle's `aria-pressed` follows every change.
+- No console errors.
+
 ## Open issues / follow-ups
 
 - Encrypted documents cannot have their password removed; merge/extract/split are refused on them (pdf-lib cannot re-encrypt).

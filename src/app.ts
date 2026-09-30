@@ -97,7 +97,7 @@ export class LeaflineApp {
     this.thumbs = new Thumbnails($("thumbnails"), {
       onGoTo: (i) => {
         this.viewer.currentPageNumber = i + 1;
-        if (window.innerWidth <= 720) this.setSidebar(false);
+        if (this.narrow()) this.setSidebar(false, false);
         this.container.focus();
       },
       onMove: (idx, before) => void this.movePages(idx, before),
@@ -116,7 +116,18 @@ export class LeaflineApp {
     $("aboutVersion").textContent = `v${VERSION}`;
     window.addEventListener("beforeunload", (e) => { if (this.dirty) { e.preventDefault(); } });
     // The viewer component does not re-fit presets ("auto", "page-width", ...) when the window resizes.
-    window.addEventListener("resize", debounce(() => this.refitPreset(), 120));
+    let wasNarrow = this.narrow();
+    window.addEventListener("resize", debounce(() => {
+      const narrow = this.narrow();
+      if (narrow !== wasNarrow) {
+        wasNarrow = narrow;
+        // Crossing the overlay breakpoint: close the sidebar so it does not hide the document,
+        // and bring it back when the window is wide again if the reader prefers it open.
+        if (narrow && !$("sidebar").hidden) this.setSidebar(false, false);
+        else if (!narrow && $("sidebar").hidden && prefs.get("sidebar", false)) this.setSidebar(true, false);
+      }
+      this.refitPreset();
+    }, 120));
     const params = new URLSearchParams(location.search);
     const file = params.get("file");
     if (file) void this.openUrl(file);
@@ -125,7 +136,8 @@ export class LeaflineApp {
   // ---------- Preferences ----------
   private applyPrefs(): void {
     this.setTheme(prefs.get<"light" | "dark">("theme", matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light"));
-    this.setSidebar(prefs.get("sidebar", false));
+    // On a narrow screen the sidebar would cover the document, so start closed there even if preferred.
+    this.setSidebar(prefs.get("sidebar", false) && !this.narrow(), false);
     this.setInvert(prefs.get("invert", false));
   }
 
@@ -141,10 +153,14 @@ export class LeaflineApp {
     prefs.set("theme", theme);
   }
 
-  private setSidebar(open: boolean): void {
+  /** Below this width the sidebar overlays the document (see the 720px media query). */
+  private narrow(): boolean { return window.innerWidth <= 720; }
+
+  /** `persist` is false for automatic open/close driven by the window size, so the reader's own choice survives. */
+  private setSidebar(open: boolean, persist = true): void {
     $("sidebar").hidden = !open;
     $("btnSidebar").setAttribute("aria-pressed", String(open));
-    prefs.set("sidebar", open);
+    if (persist) prefs.set("sidebar", open);
     if (open && this.pdf) this.thumbs.setCurrent(this.viewer.currentPageNumber - 1);
     if (this.pdf) { this.viewer.update(); this.refitPreset(); }
   }
