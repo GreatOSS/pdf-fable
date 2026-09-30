@@ -129,6 +129,8 @@ a { color: var(--accent); }
 .outline-link { flex: 1; text-align: left; border: 0; background: none; cursor: pointer; padding: 3px 4px; border-radius: 4px; line-height: 1.3; }
 .outline-link:hover { background: color-mix(in srgb, var(--fg) 7%, transparent); }
 .outline-link.current { background: var(--accent-soft); color: var(--accent); }
+li.collapsed.has-current > .outline-item .outline-link { color: var(--accent); font-weight: 600; }
+li.collapsed.has-current > .outline-item .outline-link::after { content: " •"; }
 .outline-link.bold { font-weight: 600; }
 .outline-link.italic { font-style: italic; }
 li.collapsed > .outline-list { display: none; }

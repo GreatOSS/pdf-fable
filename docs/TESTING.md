@@ -736,6 +736,15 @@ Set the text colour to #1A5FB4 and size 24, typed "Big blue note", then selected
 - **Saved bytes (pypdf):** one FreeText "Big blue note", /DA "/Helv 14 Tf 0.75 0.11 0.16 rg" (red, 14 pt), the same font size and colour in the appearance stream, at the moved rectangle.
 - No console errors. No product problems found.
 
+## Hundred-and-first session (nested outline: hidden current entry, keyboard focus)
+
+Fixture: generated `samples/outlined.pdf` (3 chapters × 10 sections, nested outline).
+
+- Jumped to Section 2.3 (page 25), then collapsed Chapter 2: the current entry disappeared with no trace. **Fixed**: collapsed ancestors of the current entry get `has-current` (accent colour, bold, " •" marker); verified marker appears on collapse and clears on expand.
+- Keyboard activation (Enter) of an outline link moves focus to the destination page's text layer. Investigated: this is deliberate PDF.js behaviour in `goToDestination` (screen readers read on from the target, same as Firefox). Kept; an attempted refocus of the link was reverted. The entry keeps `aria-current` so the reader can return to its place.
+- Mouse jump to Section 1.5 (page 9) and keyboard jump to Section 3.4 (page 47) both tracked `aria-current` correctly; single `has-current` ancestor at a time.
+- `npm run check`: 12 tests, build OK.
+
 ## Open issues / follow-ups
 
 - Encrypted documents cannot have their password removed; merge/extract/split are refused on them (pdf-lib cannot re-encrypt).

@@ -929,8 +929,11 @@ export class LeaflineApp {
         links.set(it, link);
         link.onclick = () => {
           if (it.url) { window.open(it.url, "_blank", "noopener"); return; }
+          if (!it.dest) return;
+          this.setOutlineCurrent(link);
+          // PDF.js then focuses the destination page's text layer, so screen readers read on from there.
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          if (it.dest) { this.setOutlineCurrent(link); void this.linkService.goToDestination(it.dest as any); }
+          void this.linkService.goToDestination(it.dest as any);
         };
         row.append(tg, link);
         li.appendChild(row);
@@ -975,6 +978,9 @@ export class LeaflineApp {
     this.outlineCurrent?.removeAttribute("aria-current");
     this.outlineCurrent = link;
     if (link) { link.classList.add("current"); link.setAttribute("aria-current", "true"); }
+    // Collapsed ancestors get a marker so the reader's position stays visible when the entry is hidden.
+    $("outline").querySelectorAll(".has-current").forEach((el) => el.classList.remove("has-current"));
+    for (let li = link?.closest("li")?.parentElement?.closest("li"); li; li = li.parentElement?.closest("li") ?? null) li.classList.add("has-current");
   }
 
   // ---------- Menu ----------
