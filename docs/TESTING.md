@@ -783,6 +783,15 @@ Fixture: page 2 of `samples/annots.pdf` (pypdf FreeText, red Helvetica 12 pt, re
 - Dev server had to be restarted after the previous session ended (background task stopped); now started detached with `setsid nohup`.
 - No product problems found.
 
+## Hundred-and-sixth session (text selection and copy)
+
+`arxiv.pdf` page 1 and a generated two-column page (`samples/columns.pdf`).
+
+- Mouse drag over four abstract lines: selection string has spaces within lines and one newline per line, no missing or duplicated words; a hyphenated line end ("English-\nto-German") is kept as printed. Double-click selects the word under the cursor.
+- Two columns (left column drawn first): dragging down a column selects only that column; dragging from the first left line to the first right line selects the left column in content order (same as Firefox's viewer).
+- Harness note: text near the bottom edge of the viewport (span top at 712 of 720) cannot be dragged; scroll the span into view first.
+- No product problems found.
+
 ## Open issues / follow-ups
 
 - Encrypted documents cannot have their password removed; merge/extract/split are refused on them (pdf-lib cannot re-encrypt).
