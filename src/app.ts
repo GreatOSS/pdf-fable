@@ -6,6 +6,7 @@ import { PDFViewer, EventBus, PDFLinkService, PDFFindController, PDFHistory, Scr
 import * as ops from "./pageops";
 import { Thumbnails } from "./thumbnails";
 import { printDocument, clearPrint } from "./print";
+import { makeZip } from "./zip";
 import { toast, type ToastElement, askPassword, askUrl, showDialog, confirmDialog, formatBytes, downloadBytes, debounce } from "./ui";
 import { icon } from "./icons";
 
@@ -732,6 +733,25 @@ export class LeaflineApp {
     this.viewer.pagesRotation = (this.viewer.pagesRotation + delta + 360) % 360;
   }
 
+  /** One ZIP with a single-page PDF per page: browsers block a burst of separate downloads. */
+  private async splitToZip(): Promise<void> {
+    if (!this.pdf || this.busy) return;
+    this.busy = true;
+    try {
+      const base = this.fileName.replace(/\.pdf$/i, "");
+      const parts = await ops.splitPages(await this.currentBytes(), (d, t) => this.setLoading(true, `Splitting… ${d}/${t}`));
+      const width = String(parts.length).length;
+      const zip = makeZip(parts.map((data, i) => ({ name: `${base}-page-${String(i + 1).padStart(width, "0")}.pdf`, data })));
+      downloadBytes(zip, `${base}-pages.zip`, "application/zip");
+      toast(`Split into ${parts.length} single-page file(s)`, "success");
+    } catch (err) {
+      toast(`Split failed: ${(err as Error).message}`, "error");
+    } finally {
+      this.setLoading(false);
+      this.busy = false;
+    }
+  }
+
   private async print(): Promise<void> {
     if (!this.pdf || this.busy) return;
     this.busy = true;
@@ -1058,6 +1078,7 @@ export class LeaflineApp {
       case "save": return this.save();
       case "download": return this.save(true);
       case "print": return this.print();
+      case "split": return this.splitToZip();
       case "undo-pages": if (this.history.length) return this.undoPageOp(); toast("Nothing to undo", "info"); return;
       case "scroll": this.viewer.scrollMode = Number(value); prefs.set("scrollMode", Number(value)); return;
       case "spread": this.viewer.spreadMode = Number(value); prefs.set("spreadMode", Number(value)); return;

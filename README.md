@@ -10,7 +10,7 @@
 - **Navigation**: page thumbnails, document outline, page number input, keyboard shortcuts, find with match counts, highlight-all, match case, and whole-word options.
 - **Annotate**: text highlights and free highlights, free text, freehand drawing, and images, using the PDF.js annotation editor. Annotations are written into the PDF itself.
 - **Forms**: fill text fields, checkboxes, radio buttons, and dropdowns; values are saved into the file.
-- **Organize pages**: drag thumbnails to reorder, rotate, delete, extract pages, insert blank pages, and merge other PDFs. Every page change can be undone.
+- **Organize pages**: drag thumbnails to reorder, rotate, delete, extract pages, insert blank pages, merge other PDFs, and split a document into single-page files (one ZIP download). Every page change can be undone.
 - **Save**: save in place with the File System Access API (Chromium) or download a copy; unsaved changes are flagged and guarded against accidental navigation.
 - **Print**: pages are rasterized at 150 DPI with form values and annotations included.
 - **Compatibility**: encrypted PDFs (password prompt), XFA forms, CJK fonts through bundled CMaps, JBIG2/JPX images through PDF.js wasm decoders.

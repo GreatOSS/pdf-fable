@@ -850,6 +850,12 @@ A throttled local HTTP server (64 KB every 250 ms, CORS enabled) served the samp
 - After: the extracted chapter shows Chapter 2 with Sections 2.1–2.3, Section 2.2 jumps to page 3, pypdf resolves all four (root count 4). Merging into a 3-page file appends 33 entries; "Chapter 2" jumps to page 24 (21 + 3).
 - `npm run check`: 17 tests, build OK.
 
+## Hundred-and-fourteenth session (split into single pages)
+
+- `splitPages` existed in pageops but had no UI. **Added** a menu action "Split into single pages (ZIP)" backed by a small stored-ZIP writer (`src/zip.ts`, CRC-32 checked against the standard vector) so the user gets one download rather than a burst that browsers block; progress text while splitting; README updated. Two unit tests (19 total).
+- `welcome.pdf` → `welcome-pages.zip` (14.8 KB): Python's zipfile validates it; 7 entries `welcome-page-1.pdf` … `-7.pdf`, each 1 page; page 6 keeps its form fields (name, agree, …); page 7 keeps `/Rotate 90`. Toast "Split into 7 single-page file(s)", overlay hidden, app not busy.
+- `big.pdf` (600 pages) → `big-pages.zip` (1.0 MB, names zero-padded to `-page-001`) in about 0.5 s.
+
 ## Open issues / follow-ups
 
 - Encrypted documents cannot have their password removed; merge/extract/split are refused on them (pdf-lib cannot re-encrypt).

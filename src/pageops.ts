@@ -363,11 +363,12 @@ export async function reorderPages(bytes: Uint8Array, order: number[]): Promise<
 }
 
 /** Splits every page into its own single-page document. */
-export async function splitPages(bytes: Uint8Array): Promise<Uint8Array[]> {
+export async function splitPages(bytes: Uint8Array, onProgress?: (done: number, total: number) => void): Promise<Uint8Array[]> {
   const src = await load(bytes);
   if (src.isEncrypted) throw new Error("Splitting a password-protected PDF is not supported.");
   const out: Uint8Array[] = [];
   for (const i of src.getPageIndices()) {
+    onProgress?.(i, src.getPageCount());
     const doc = await PDFDocument.create();
     const [p] = await doc.copyPages(src, [i]);
     doc.addPage(p);
