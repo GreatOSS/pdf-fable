@@ -704,6 +704,14 @@ Opened the shortcuts dialog with `?` on the 60-page document and pressed every d
 - **Accessibility fix:** the theme button's spoken name stayed "Toggle dark theme" in both states (only the tooltip changed) and its icon attribute went stale. It now carries the same text as its tooltip ("Switch to dark theme" / "Switch to light theme"), `aria-pressed` reflecting dark mode, and the matching icon name; verified across toggle, reload (dark persisted) and toggle back. In dark mode the button shows the pressed tint with the sun icon.
 - No console errors.
 
+### Ninety-seventh session (annotations across page delete and reorder)
+
+Drew an ink stroke on page 2, typed a note on page 3 and highlighted a word on page 4 of the welcome document, then deleted page 1 and dragged the highlight page to the front.
+
+- **After delete:** 6 pages; pypdf shows the /Ink on "Reading" (now page 1), the /FreeText "note on page three" on "Annotate" (page 2) and the /Highlight on "Organize pages" (page 3). Nothing lost or shifted.
+- **After reorder:** "Organize pages" leads with its highlight, followed by "Reading" with the ink and "Annotate" with the note; the remaining pages keep their order and the form page keeps its widgets.
+- Both operations showed their undo toasts; no console errors.
+
 ## Open issues / follow-ups
 
 - Encrypted documents cannot have their password removed; merge/extract/split are refused on them (pdf-lib cannot re-encrypt).
