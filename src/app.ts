@@ -723,6 +723,10 @@ export class LeaflineApp {
     if (!this.pdf || this.busy) return;
     this.busy = true;
     const pc = $("printContainer");
+    // Browsers use the tab title for the printed PDF's title and the "Save as PDF" file name,
+    // so show the plain document name (without the app suffix) while the print dialog is open.
+    const title = document.title;
+    document.title = title.replace(/ — Leafline$/, "");
     try {
       // Print the current in-memory document including form values and annotations.
       const bytes = await this.currentBytes();
@@ -737,7 +741,7 @@ export class LeaflineApp {
     } finally {
       this.setLoading(false);
       this.busy = false;
-      setTimeout(() => clearPrint(pc), 1000);
+      setTimeout(() => { clearPrint(pc); if (document.title === title.replace(/ — Leafline$/, "")) document.title = title; }, 1000);
     }
   }
 

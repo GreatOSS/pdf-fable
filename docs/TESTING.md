@@ -745,6 +745,15 @@ Fixture: generated `samples/outlined.pdf` (3 chapters × 10 sections, nested out
 - Mouse jump to Section 1.5 (page 9) and keyboard jump to Section 3.4 (page 47) both tracked `aria-current` correctly; single `has-current` ancestor at a time.
 - `npm run check`: 12 tests, build OK.
 
+## Hundred-and-second session (print output rendered headless)
+
+First time the actual print layout was rendered rather than only the hidden container: `window.print` stubbed, print media emulated, Chromium's page-to-PDF used with CSS page sizes, output inspected with pypdf and re-opened in Leafline.
+
+- Mixed-size document (A4 portrait, Letter landscape, A5, Letter with `/Rotate 90`): output has 4 sheets sized 595×842, 792×612, 420×595, 792×612 pt, no blank trailing sheet; named `@page` rules keep each sheet its own size.
+- arXiv paper with view rotation 90°: 15 landscape sheets, page 1 fully rendered and rotated clockwise, text within the sheet.
+- Rough edge: the printed PDF's title (and the browser's "Save as PDF" file name) was "arxiv — Leafline" because browsers take the tab title. **Fixed**: the tab title is the plain document name while printing and restored afterwards (verified: "arxiv" during, "arxiv — Leafline" after).
+- `npm run check`: 12 tests, build OK.
+
 ## Open issues / follow-ups
 
 - Encrypted documents cannot have their password removed; merge/extract/split are refused on them (pdf-lib cannot re-encrypt).
