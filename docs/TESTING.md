@@ -720,6 +720,14 @@ Resized the window from 1280 px down to 380 px and back with the 60-page documen
 - **Rough edge fixed:** narrowing the window left the open sidebar overlaying and hiding the document, and on a narrow screen a saved "sidebar open" preference opened the overlay at startup. Now crossing the 720 px breakpoint closes the sidebar (and reopens it when widening if the reader prefers it open), a narrow startup begins closed, and a thumbnail tap or the automatic close no longer overwrites the preference; the reader can still open it manually on a phone-sized window. Verified: 1280 open → 600 closed (pref kept) → 1280 open; manual open at 600, thumbnail tap to page 4 closes it, widening reopens; 380 px reload starts closed; the toggle's `aria-pressed` follows every change.
 - No console errors.
 
+### Ninety-ninth session (ink and highlight parameters end to end)
+
+Set the ink colour picker to #C0392B, thickness 12 and opacity 40, drew a zig-zag on page 1; picked the green highlight swatch and highlighted a word on page 2.
+
+- **Saved bytes (pypdf):** the /Ink annotation has colour #C0392B, border width 12 and /CA 0.4; the /Highlight has colour #53FFBC. Every control value reached the file exactly.
+- **UI:** the swatch bar marks the active colour; the highlight thickness slider (free highlight) and "Show all" checkbox are present; the stroke renders translucent and thick on the page.
+- No console errors. No product problems found.
+
 ## Open issues / follow-ups
 
 - Encrypted documents cannot have their password removed; merge/extract/split are refused on them (pdf-lib cannot re-encrypt).
