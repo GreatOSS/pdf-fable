@@ -131,6 +131,7 @@ a { color: var(--accent); }
 .outline-link.current { background: var(--accent-soft); color: var(--accent); }
 li.collapsed.has-current > .outline-item .outline-link { color: var(--accent); font-weight: 600; }
 li.collapsed.has-current > .outline-item .outline-link::after { content: " •"; }
+.outline-link.unavailable { color: var(--muted); opacity: 0.7; }
 .outline-link.bold { font-weight: 600; }
 .outline-link.italic { font-style: italic; }
 li.collapsed > .outline-list { display: none; }

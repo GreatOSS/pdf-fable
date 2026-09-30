@@ -1,6 +1,6 @@
 // Pure page operations on PDF bytes, implemented with pdf-lib.
 // All page indexes are 0-based. Functions never mutate their input.
-import { PDFDocument, PDFDict, PDFName, PDFRef, PDFString, PDFHexString, PDFObjectCopier, degrees, type PDFPage } from "pdf-lib";
+import { PDFDocument, PDFArray, PDFDict, PDFName, PDFRef, PDFString, PDFHexString, PDFObject, PDFObjectCopier, degrees, type PDFPage } from "pdf-lib";
 
 async function load(bytes: Uint8Array): Promise<PDFDocument> {
   return PDFDocument.load(bytes, { ignoreEncryption: true, updateMetadata: false });
@@ -66,6 +66,63 @@ function adoptFields(doc: PDFDocument, pages: PDFPage[], src: PDFDocument): void
   }
 }
 
+/**
+ * Points every destination that targets one of `removed` pages at the nearest surviving page
+ * (the next one, or the previous one at the end). Covers outline items, link annotations on the
+ * remaining pages, the catalog's /Dests dictionary and the /Names destination tree. Without this,
+ * bookmarks to a deleted page silently stop working in every viewer.
+ */
+function retargetDestinations(doc: PDFDocument, removed: Set<string>, replacement: Map<string, PDFRef>): void {
+  const ctx = doc.context;
+  const look = (o: PDFObject | undefined): PDFObject | undefined => (o instanceof PDFRef ? ctx.lookup(o) : o);
+  const fixArray = (arr: PDFArray) => {
+    const first = arr.get(0);
+    if (first instanceof PDFRef && removed.has(first.toString())) arr.set(0, replacement.get(first.toString())!);
+  };
+  // A destination may be an explicit array, or a dictionary holding one under /D (named dests, GoTo actions).
+  const fixDest = (o: PDFObject | undefined) => {
+    const v = look(o);
+    if (v instanceof PDFArray) fixArray(v);
+    else if (v instanceof PDFDict) { const d = look(v.get(PDFName.of("D"))); if (d instanceof PDFArray) fixArray(d); }
+  };
+  const fixHolder = (d: PDFDict) => {
+    fixDest(d.get(PDFName.of("Dest")));
+    const a = look(d.get(PDFName.of("A")));
+    if (a instanceof PDFDict && a.get(PDFName.of("S")) === PDFName.of("GoTo")) fixDest(a.get(PDFName.of("D")));
+  };
+  const seen = new Set<string>();
+  const walkOutline = (o: PDFObject | undefined) => {
+    for (let ref = o; ref instanceof PDFRef && !seen.has(ref.toString()); ) {
+      seen.add(ref.toString());
+      const item = ctx.lookup(ref);
+      if (!(item instanceof PDFDict)) break;
+      fixHolder(item);
+      walkOutline(item.get(PDFName.of("First")));
+      ref = item.get(PDFName.of("Next"));
+    }
+  };
+  const outlines = look(doc.catalog.get(PDFName.of("Outlines")));
+  if (outlines instanceof PDFDict) walkOutline(outlines.get(PDFName.of("First")));
+  for (const page of doc.getPages()) {
+    const annots = page.node.Annots();
+    if (!annots) continue;
+    for (let i = 0; i < annots.size(); i++) { const a = look(annots.get(i)); if (a instanceof PDFDict) fixHolder(a); }
+  }
+  const dests = look(doc.catalog.get(PDFName.of("Dests")));
+  if (dests instanceof PDFDict) for (const [, v] of dests.entries()) fixDest(v);
+  const walkNames = (o: PDFObject | undefined) => {
+    const node = look(o);
+    if (!(node instanceof PDFDict) || seen.has(String(o))) return;
+    seen.add(String(o));
+    const names = look(node.get(PDFName.of("Names")));
+    if (names instanceof PDFArray) for (let i = 1; i < names.size(); i += 2) fixDest(names.get(i));
+    const kids = look(node.get(PDFName.of("Kids")));
+    if (kids instanceof PDFArray) for (let i = 0; i < kids.size(); i++) walkNames(kids.get(i));
+  };
+  const nameTree = look(doc.catalog.get(PDFName.of("Names")));
+  if (nameTree instanceof PDFDict) walkNames(nameTree.get(PDFName.of("Dests")));
+}
+
 function normalize(indexes: number[], count: number): number[] {
   return [...new Set(indexes)].filter((i) => i >= 0 && i < count).sort((a, b) => a - b);
 }
@@ -79,7 +136,19 @@ export async function deletePages(bytes: Uint8Array, indexes: number[]): Promise
   const targets = normalize(indexes, doc.getPageCount());
   if (targets.length === 0) return bytes;
   if (targets.length >= doc.getPageCount()) throw new Error("A document must keep at least one page.");
+  const refs = doc.getPages().map((p) => p.ref);
+  const gone = new Set(targets);
+  const removed = new Set<string>();
+  const replacement = new Map<string, PDFRef>();
+  for (const i of targets) {
+    let j = i + 1;
+    while (j < refs.length && gone.has(j)) j++;
+    if (j >= refs.length) { j = i - 1; while (j >= 0 && gone.has(j)) j--; }
+    removed.add(refs[i].toString());
+    replacement.set(refs[i].toString(), refs[j]);
+  }
   for (const i of [...targets].reverse()) doc.removePage(i);
+  retargetDestinations(doc, removed, replacement);
   return save(doc);
 }
 

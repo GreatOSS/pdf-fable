@@ -940,6 +940,7 @@ export class LeaflineApp {
         links.set(it, link);
         link.onclick = () => {
           if (it.url) { window.open(it.url, "_blank", "noopener"); return; }
+          if (link.classList.contains("unavailable")) { toast("This entry points to a page that is no longer in the document.", "info"); return; }
           if (!it.dest) return;
           this.setOutlineCurrent(link);
           // PDF.js then focuses the destination page's text layer, so screen readers read on from there.
@@ -963,7 +964,13 @@ export class LeaflineApp {
           if (typeof dest === "string") dest = await pdf.getDestination(dest);
           const ref = Array.isArray(dest) ? dest[0] : null;
           if (ref && typeof ref === "object") entries.push({ page: (await pdf.getPageIndex(ref)) + 1, link: links.get(it)! });
-        } catch { /* broken destination: entry simply never becomes current */ }
+          else if (ref == null && it.dest) throw new Error("unresolved");
+        } catch {
+          // Broken destination (e.g. its page was removed by another tool): show it, but say so instead of doing nothing.
+          const link = links.get(it)!;
+          link.classList.add("unavailable");
+          link.title = "The page this entry pointed to is no longer in the document";
+        }
         if (it.items?.length) await walk(it.items);
       }
     };

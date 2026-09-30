@@ -818,6 +818,15 @@ Merged `welcome.pdf` (four form fields) into `annots.pdf` through the sidebar's 
 - After the fix: merged file has an AcroForm with 4 fields, typed name and ticked checkbox saved; merging the form again gives 8 fields ("name", "name (2)", …) with independent values ("Merged form" / "Second copy") both in the UI and in the saved bytes.
 - `npm run check`: 14 tests, build OK.
 
+## Hundred-and-tenth session (deleting pages that bookmarks point to)
+
+`samples/outlined.pdf` (60 pages, nested outline); deleted page 1 from the sidebar.
+
+- Rough edge: "Chapter 1" and "Section 1.1" pointed at the deleted page; clicking them did nothing and PDF.js logged "not a valid page reference". Other entries shifted correctly. **Fixed** in pageops: on delete, every destination that targets a removed page (outline items, GoTo link annotations on the remaining pages, the catalog /Dests dictionary and the /Names destination tree) is retargeted to the next surviving page, or the previous one at the end. Unit test added (15 total).
+- After the fix: from page 30, clicking Chapter 1 goes to page 1 with no console error; Section 1.2 goes to page 2; pypdf resolves the saved bookmarks (Chapter 1 → 1, Section 1.3 → 4).
+- Defence for files broken by other tools (`samples/dangling.pdf`, the pre-fix output): entries whose page cannot be resolved are dimmed with a tooltip, and clicking shows "This entry points to a page that is no longer in the document." instead of doing nothing.
+- `npm run check`: 15 tests, build OK.
+
 ## Open issues / follow-ups
 
 - Encrypted documents cannot have their password removed; merge/extract/split are refused on them (pdf-lib cannot re-encrypt).

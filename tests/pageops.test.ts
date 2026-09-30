@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeAll } from "vitest";
-import { PDFDocument, StandardFonts } from "pdf-lib";
+import { PDFDocument, PDFArray, PDFDict, PDFName, PDFRef, StandardFonts } from "pdf-lib";
 import * as ops from "../src/pageops";
 import { readFileSync } from "node:fs";
 
@@ -31,6 +31,31 @@ describe("pageops", () => {
   it("deletes pages and keeps the rest in order", async () => {
     const out = await ops.deletePages(base, [1, 3]);
     expect(await widths(out)).toEqual([301, 303, 305]);
+  });
+
+  it("retargets bookmarks and links that pointed at deleted pages", async () => {
+    const doc = await PDFDocument.load(base);
+    const ctx = doc.context;
+    const pages = doc.getPages();
+    const item = (title: string, page: number) => ctx.register(ctx.obj({ Title: title, Dest: [pages[page].ref, "Fit"] }));
+    const first = item("Part A", 1), second = item("Part B", 4);
+    ctx.lookup(first, PDFDict).set(PDFName.of("Next"), second);
+    const outlines = ctx.register(ctx.obj({ Type: "Outlines", First: first, Last: second, Count: 2 }));
+    doc.catalog.set(PDFName.of("Outlines"), outlines);
+    const link = ctx.register(ctx.obj({ Type: "Annot", Subtype: "Link", Rect: [0, 0, 10, 10], A: { S: "GoTo", D: [pages[1].ref, "Fit"] } }));
+    pages[0].node.set(PDFName.of("Annots"), ctx.obj([link]));
+    doc.catalog.set(PDFName.of("Dests"), ctx.obj({ chapter: [pages[4].ref, "Fit"] }));
+    const out = await PDFDocument.load(await ops.deletePages(await doc.save(), [1, 4]));
+    const target = (arr: PDFArray) => out.getPages().findIndex((p) => p.ref.toString() === (arr.get(0) as PDFRef).toString());
+    const octx = out.context;
+    const o1 = octx.lookup(octx.lookup(doc.catalog.get(PDFName.of("Outlines")) as PDFRef, PDFDict).get(PDFName.of("First")) as PDFRef, PDFDict);
+    const dest1 = o1.lookup(PDFName.of("Dest"), PDFArray);
+    expect(target(dest1)).toBe(1); // old page 3 is the next survivor after deleted page 2
+    const o2 = octx.lookup(o1.get(PDFName.of("Next")) as PDFRef, PDFDict);
+    expect(target(o2.lookup(PDFName.of("Dest"), PDFArray))).toBe(2); // last page deleted: falls back to the previous one
+    const annot = octx.lookup((out.getPage(0).node.Annots() as PDFArray).get(0) as PDFRef, PDFDict);
+    expect(target(annot.lookup(PDFName.of("A"), PDFDict).lookup(PDFName.of("D"), PDFArray))).toBe(1);
+    expect(target(out.catalog.lookup(PDFName.of("Dests"), PDFDict).lookup(PDFName.of("chapter"), PDFArray))).toBe(2);
   });
 
   it("refuses to delete every page", async () => {
