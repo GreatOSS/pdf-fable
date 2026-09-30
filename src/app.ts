@@ -41,7 +41,7 @@ const prefs = {
   set(k: string, v: unknown): void { try { localStorage.setItem(`leafline.${k}`, JSON.stringify(v)); } catch { /* ignore */ } },
 };
 
-interface PendingView { page?: number; scaleValue?: string; }
+interface PendingView { page?: number; scaleValue?: string; rotation?: number; }
 
 export class LeaflineApp {
   private eventBus = new EventBus();
@@ -178,6 +178,8 @@ export class LeaflineApp {
     bus.on("pagesinit", () => {
       const v = this.pendingView;
       this.pendingView = null;
+      // PDF.js resets the view rotation with every document; keep it across page-operation reloads.
+      if (v?.rotation) this.viewer.pagesRotation = v.rotation;
       this.viewer.currentScaleValue = v?.scaleValue ?? prefs.get("zoom", "auto");
       if (v?.page) this.viewer.currentPageNumber = Math.min(v.page, this.viewer.pagesCount);
       this.viewer.scrollMode = prefs.get("scrollMode", ScrollMode.VERTICAL);
@@ -190,7 +192,10 @@ export class LeaflineApp {
     // Real page sizes arrive after pagesinit (placeholders use the first page's size until then).
     bus.on("pagesloaded", () => this.fitWidestPage());
     // Rotated pages change their widths, so presets must be re-fitted.
-    bus.on("rotationchanging", () => setTimeout(() => this.refitPreset(), 0));
+    bus.on("rotationchanging", ({ pagesRotation }: { pagesRotation: number }) => {
+      this.thumbs.setRotation(pagesRotation);
+      setTimeout(() => this.refitPreset(), 0);
+    });
     // Spreads and horizontal layouts change how many pages share a row, so presets must be re-fitted.
     bus.on("spreadmodechanged", () => setTimeout(() => this.refitPreset(), 0));
     bus.on("scrollmodechanged", () => setTimeout(() => this.refitPreset(), 0));
@@ -338,6 +343,7 @@ export class LeaflineApp {
     this.viewer.setDocument(pdf);
     this.linkService.setDocument(pdf, null);
     this.pdfHistory.initialize({ fingerprint: pdf.fingerprints[0] ?? "", resetHistory: true, updateUrl: false });
+    this.thumbs.setRotation(0);
     this.thumbs.setDocument(pdf);
     if (old && old !== task) {
       void Promise.race([oldPages ?? Promise.resolve(), new Promise((r) => setTimeout(r, 5000))]).then(() => old.destroy()).catch(() => {});
@@ -432,7 +438,7 @@ export class LeaflineApp {
       const out = await fn(before);
       this.history.push(snapshot);
       if (this.history.length > 10) this.history.shift();
-      await this.load({ data: out }, this.fileName, { page: page ?? this.viewer.currentPageNumber, scaleValue: this.fitted?.preset ?? this.viewer.currentScaleValue, dirty: true });
+      await this.load({ data: out }, this.fileName, { page: page ?? this.viewer.currentPageNumber, scaleValue: this.fitted?.preset ?? this.viewer.currentScaleValue, rotation: this.viewer.pagesRotation, dirty: true });
       // Rotation keeps the same pages, so the reader can rotate again or delete without reselecting.
       if (keepSelection) this.thumbs.setSelection(keepSelection);
       // Only the latest change can be undone, so never show two undo toasts at once.
@@ -456,7 +462,7 @@ export class LeaflineApp {
     // Hold the busy flag so a held Ctrl+Z cannot start a second reload while this one is in flight.
     this.busy = true;
     try {
-      await this.load({ data: prev.bytes }, this.fileName, { page: this.viewer.currentPageNumber, scaleValue: this.fitted?.preset ?? this.viewer.currentScaleValue, dirty: prev.dirty });
+      await this.load({ data: prev.bytes }, this.fileName, { page: this.viewer.currentPageNumber, scaleValue: this.fitted?.preset ?? this.viewer.currentScaleValue, rotation: this.viewer.pagesRotation, dirty: prev.dirty });
     } finally {
       this.busy = false;
     }

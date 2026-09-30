@@ -21,6 +21,7 @@ export class Thumbnails {
   private current = 0;
   private marker: HTMLElement;
   private dragFrom: number[] | null = null;
+  private rotation = 0;
 
   constructor(private container: HTMLElement, private cb: ThumbnailCallbacks) {
     this.observer = new IntersectionObserver((entries) => {
@@ -124,6 +125,14 @@ export class Thumbnails {
     this.syncSelection();
   }
 
+  /** Follow the viewer's rotation so the sidebar shows pages the way they are displayed. */
+  setRotation(deg: number): void {
+    const r = ((deg % 360) + 360) % 360;
+    if (r === this.rotation) return;
+    this.rotation = r;
+    if (this.items.length) this.refresh();
+  }
+
   /** Re-render thumbnails (e.g. after rotation changes). */
   refresh(): void {
     this.generation++;
@@ -200,10 +209,11 @@ export class Thumbnails {
     try {
       const page = await pdf.getPage(i + 1);
       if (gen !== this.generation) return;
-      const base = page.getViewport({ scale: 1 });
+      const rotation = (page.rotate + this.rotation) % 360;
+      const base = page.getViewport({ scale: 1, rotation });
       const dpr = Math.min(window.devicePixelRatio || 1, 2);
       const scale = THUMB_WIDTH / base.width;
-      const viewport = page.getViewport({ scale: scale * dpr });
+      const viewport = page.getViewport({ scale: scale * dpr, rotation });
       const canvas = el.querySelector("canvas")!;
       canvas.width = Math.floor(viewport.width);
       canvas.height = Math.floor(viewport.height);

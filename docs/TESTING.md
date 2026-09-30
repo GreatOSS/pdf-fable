@@ -862,6 +862,14 @@ A throttled local HTTP server (64 KB every 250 ms, CORS enabled) served the samp
 - Keyboard: ArrowDown walks all 21 items to "About Leafline"; Enter on "Wrapped" sets scroll mode 2 and closes the menu; reopening shows the chip checked. Chips checked in light and dark themes look right (screenshots).
 - `npm run check`: 19 tests, build OK.
 
+## Hundred-and-sixteenth session (view rotation)
+
+`arxiv.pdf`, R / Shift+R and the menu's "Rotate view" items.
+
+- R turns the view to 90°: page-fit re-fits to a landscape page with no horizontal overflow; find "Attention Is All" highlights the rotated title (highlight rect overlaps the text span); dragging along the now-vertical title selects "Attention Is All You Need"; Shift+R returns to 0°; saving while rotated does not change the file (view-only, as in Firefox; the sidebar's rotate is the persistent one).
+- Rough edges: thumbnails stayed upright while the pages turned, and a page operation (which reloads the document) snapped the view back to 0°. **Fixed**: thumbnails follow the view rotation (re-rendered on `rotationchanging`, reset for a new document) and page-operation reloads restore the rotation. Verified: thumbnail 150×194 → 150×115 at 90°; delete page 2 and undo keep 90°; opening another document resets to 0° with upright thumbnails.
+- `npm run check`: 19 tests, build OK.
+
 ## Open issues / follow-ups
 
 - Encrypted documents cannot have their password removed; merge/extract/split are refused on them (pdf-lib cannot re-encrypt).
