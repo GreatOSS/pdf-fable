@@ -681,6 +681,14 @@ Opened a 6 KB truncated PDF, a zero-byte file, an HTML file, a fake JPEG, a PDF 
 - **Bug caught while fixing:** PDF.js transfers the byte buffer to its worker, so the array is detached (length 0) by the time the error arrives; the first version reported every file-based failure as "empty". Size and header are now captured before the buffer is handed over.
 - Note: on the dev server a missing `?file=` URL still reports "damaged", because Vite answers unknown paths with the app's HTML; a static host returns 404 and gets "Could not find".
 
+### Ninety-fourth session (Open from URL: validation and failure messages)
+
+Used the Open from URL dialog with bad, blocked, missing, non-PDF and good addresses.
+
+- **Dialog:** focus lands in the URL field; Escape cancels; the browser's own validation stops "not a url" with "Please enter a URL."; a good same-origin URL opens (3 pages, title and file name set).
+- **Messages improved:** a cross-origin or unreachable address used to say "Failed to fetch", and a non-PDF URL was reported as a damaged file named "favicon.svg.pdf". Now: `Could not download "x". The server may not allow cross-origin access, or the address is unreachable.`; `"favicon.svg" is not a PDF file.` (the original name is used in messages; ".pdf" is still appended for saving); and on a real static server a missing file gives `Could not find "nope.pdf".` (verified with a plain HTTP server on the built `dist/`; the dev server answers unknown paths with HTML, so there it reads "not a PDF file"). On failure the app fetches the first kilobyte of the URL to tell these cases apart.
+- After each failure the welcome screen stays usable and the next open works.
+
 ## Open issues / follow-ups
 
 - Encrypted documents cannot have their password removed; merge/extract/split are refused on them (pdf-lib cannot re-encrypt).

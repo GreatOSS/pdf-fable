@@ -228,8 +228,9 @@ export class LeaflineApp {
     this.password = null;
     let name = "document.pdf";
     try { name = decodeURIComponent(new URL(url, location.href).pathname.split("/").pop() || name) || name; } catch { /* keep default */ }
+    const displayName = name;
     if (!/\.pdf$/i.test(name)) name += ".pdf";
-    await this.load({ url: new URL(url, location.href).href }, name, {});
+    await this.load({ url: new URL(url, location.href).href }, name, { displayName });
   }
 
   private async confirmDiscard(): Promise<boolean> {
@@ -238,10 +239,12 @@ export class LeaflineApp {
   }
 
   /** Plain-language explanations for the ways a file can fail to open. */
-  private describeOpenError(e: Error, name: string, probe?: { size: number; head: string }): string {
+  private describeOpenError(e: Error, name: string, probe?: { size: number; head: string; status?: number }): string {
     const msg = String(e?.message ?? e);
-    if (e?.name === "MissingPDFException" || /missing pdf/i.test(msg)) return `Could not find "${name}".`;
+    if (e?.name === "MissingPDFException" || /missing pdf/i.test(msg) || probe?.status === 404) return `Could not find "${name}".`;
+    if (probe?.status && probe.status >= 400) return `Could not download "${name}" (the server answered ${probe.status}).`;
     if (e?.name === "UnexpectedResponseException") return `Could not download "${name}" (server error).`;
+    if (/failed to fetch|networkerror|load failed/i.test(msg)) return `Could not download "${name}". The server may not allow cross-origin access, or the address is unreachable.`;
     if (/empty/i.test(msg) || probe?.size === 0) return `"${name}" is empty (0 bytes).`;
     if (e?.name === "InvalidPDFException") {
       // PDF.js accepts a header anywhere in the first 1 KB; if none is there this is not a PDF at all.
@@ -251,7 +254,16 @@ export class LeaflineApp {
     return `Could not open "${name}": ${msg}`;
   }
 
-  private async load(src: { data?: Uint8Array; url?: string }, name: string, view: PendingView & { dirty?: boolean }): Promise<void> {
+  /** Fetches the first kilobyte of a URL so a failed open can be explained (404, not a PDF, blocked). */
+  private async probeUrl(url: string): Promise<{ size: number; head: string; status: number } | undefined> {
+    try {
+      const res = await fetch(url, { headers: { Range: "bytes=0-1023" } });
+      const buf = new Uint8Array(await res.arrayBuffer());
+      return { size: buf.length, head: new TextDecoder("latin1").decode(buf.subarray(0, 1024)), status: res.status };
+    } catch { return undefined; }
+  }
+
+  private async load(src: { data?: Uint8Array; url?: string }, name: string, view: PendingView & { dirty?: boolean; displayName?: string }): Promise<void> {
     this.setLoading(true, "Loading…");
     // PDF.js transfers the buffer to its worker (detaching it), so record what we need for error messages now.
     const probe = src.data ? { size: src.data.length, head: new TextDecoder("latin1").decode(src.data.subarray(0, 1024)) } : undefined;
@@ -282,7 +294,8 @@ export class LeaflineApp {
       // A load superseded by a newer one (or cancelled at the password prompt) is not an error to report.
       if (e?.name === "PasswordException" || this.loadingTask !== task || /destroyed|aborted/i.test(String(e?.message))) { this.setLoading(false); return; }
       console.warn("open failed", err);
-      toast(this.describeOpenError(e, name, probe), "error", 6000);
+      const info = probe ?? (src.url ? await this.probeUrl(src.url) : undefined);
+      toast(this.describeOpenError(e, view.displayName ?? name, info), "error", 7000);
     } finally {
       this.setLoading(false);
     }
