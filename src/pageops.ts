@@ -7,7 +7,7 @@ async function load(bytes: Uint8Array): Promise<PDFDocument> {
 }
 
 async function save(doc: PDFDocument): Promise<Uint8Array> {
-  return doc.save({ useObjectStreams: false });
+  return doc.save({ useObjectStreams: true });
 }
 
 function normalize(indexes: number[], count: number): number[] {

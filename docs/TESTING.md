@@ -754,6 +754,15 @@ First time the actual print layout was rendered rather than only the hidden cont
 - Rough edge: the printed PDF's title (and the browser's "Save as PDF" file name) was "arxiv — Leafline" because browsers take the tab title. **Fixed**: the tab title is the plain document name while printing and restored afterwards (verified: "arxiv" during, "arxiv — Leafline" after).
 - `npm run check`: 12 tests, build OK.
 
+## Hundred-and-third session (600-page document, save size)
+
+Fixture: generated `samples/big.pdf` (600 A4 text pages, 530 KB).
+
+- Load to first paint ≈0.6 s, 22 MB heap; 600 thumbnail placeholders but only ~48 rendered (lazy), 2 page canvases. Jump to page 600: 1 s, current thumbnail scrolled to the list bottom. 30 wheel steps kept ≤10 canvases alive, no long tasks (>50 ms); per-step timing was identical with the sidebar closed, so the cost is the automation round trip.
+- Rotate page 300 via the sidebar: 0.6–0.7 s, stayed on page 300, undo toast. Search "page 600." across all pages: 0.96 s, "1 of 30 matches", jumped to page 600.
+- Rough edge: the saved file doubled (530 KB → 1.04 MB) after one page rotation because pdf-lib was saving without object streams. **Fixed**: page operations now save with object streams (530 KB after the rotation). Verified the round trip on top of it: ink drawn on page 300 saved as a 2 KB incremental update, reopened (600 pages, /Rotate 90 and /Ink on page 300, text intact, pypdf reads it); welcome form after rotating page 1: name/checkbox values present in the saved bytes.
+- `npm run check`: 12 tests, build OK.
+
 ## Open issues / follow-ups
 
 - Encrypted documents cannot have their password removed; merge/extract/split are refused on them (pdf-lib cannot re-encrypt).
