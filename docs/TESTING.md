@@ -802,6 +802,14 @@ Fixture: `samples/highlight.pdf` (arXiv page 1 with a pypdf yellow highlight ove
 - Harness note: a picker stub that swallows the click without dispatching `cancel` leaves an empty stamp editor that breaks saving (`addButton of null`); dispatch `cancel` on the input in stubs.
 - `npm run check`: 12 tests, build OK.
 
+## Hundred-and-eighth session (document properties with awkward metadata)
+
+Fixtures: `samples/meta-unicode.pdf` (Japanese/Cyrillic/curly-quote title and author, empty Subject, `CreationDate` with +05'30' offset, truncated `ModDate` "D:20260930T"), `samples/meta-none.pdf` (only a Producer), `samples/meta-long.pdf` (180-character unbroken title, URL-like author).
+
+- Unicode fields display and set the tab title; empty or missing fields show "—"; the offset date converts to local time (1/1/2024 9:34:05 PM here); the truncated date parses to midnight of that day; page size 148 × 210 mm for A5.
+- Long unbroken values wrap inside the 640 px dialog (no horizontal overflow, page does not scroll sideways); Escape closes.
+- No product problems found.
+
 ## Open issues / follow-ups
 
 - Encrypted documents cannot have their password removed; merge/extract/split are refused on them (pdf-lib cannot re-encrypt).
