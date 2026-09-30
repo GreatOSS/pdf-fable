@@ -774,6 +774,15 @@ Fixture: `samples/annots.pdf` (two arXiv pages with a pypdf sticky note by "Ada"
 - Note for future work: editing files under `node_modules` needs `rm -rf node_modules/.vite` and a dev-server restart, otherwise Vite serves the pre-bundled copy.
 - `npm run check`: 12 tests, build OK.
 
+## Hundred-and-fifth session (editing a free text written by another tool)
+
+Fixture: page 2 of `samples/annots.pdf` (pypdf FreeText, red Helvetica 12 pt, rect 200×40 pt).
+
+- Renders from its appearance stream at the expected place. Free-text tool: the existing annotation hides and an editor with the same text appears at the same spot (no jump); double-click, End, typing " (edited)", click away, back to Select: text updated, editor toolbar (colour, delete) shown, document dirty.
+- Saved bytes: `/Contents` "Existing free text (edited)", `/Rect` tightened to the new text width, fresh `/AP`, `/M` set. Console: one PDF.js warning that the fixture's `/DA` font "Helv" has no resource (falls back to a default font) — fixture limitation.
+- Dev server had to be restarted after the previous session ended (background task stopped); now started detached with `setsid nohup`.
+- No product problems found.
+
 ## Open issues / follow-ups
 
 - Encrypted documents cannot have their password removed; merge/extract/split are refused on them (pdf-lib cannot re-encrypt).
