@@ -827,6 +827,15 @@ Merged `welcome.pdf` (four form fields) into `annots.pdf` through the sidebar's 
 - Defence for files broken by other tools (`samples/dangling.pdf`, the pre-fix output): entries whose page cannot be resolved are dimmed with a tooltip, and clicking shows "This entry points to a page that is no longer in the document." instead of doing nothing.
 - `npm run check`: 15 tests, build OK.
 
+## Hundred-and-eleventh session (opening from a slow URL, switching documents mid-load)
+
+A throttled local HTTP server (64 KB every 250 ms, CORS enabled) served the samples on port 8790.
+
+- Open from URL over the slow link: overlay shows "Loading… 12% … 99%" in step with the transfer, then the 600 pages appear; no toast.
+- Switching to another URL while the first is still streaming: the second document wins, the abandoned load produces no toast and the overlay clears.
+- Rough edge: switching away from the 600-page document produced ~190 console errors ("Unable to get page N to initialize viewer: Transport destroyed"). Cause: after a successful load the loading task was also the displayed document's task, so the next open destroyed the live transport while the viewer was still fetching its pages. **Fixed**: only an unfinished load is aborted at the start of a new one, and the replaced document is destroyed once the viewer's page loop has drained (5 s cap). After the fix: five switches, including leaving the 600-page document 200 ms after it opened and two opens 150 ms apart, logged zero errors; heap back at 23 MB; new document renders.
+- `npm run check`: 15 tests, build OK.
+
 ## Open issues / follow-ups
 
 - Encrypted documents cannot have their password removed; merge/extract/split are refused on them (pdf-lib cannot re-encrypt).

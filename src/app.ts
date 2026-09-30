@@ -290,7 +290,8 @@ export class LeaflineApp {
     this.setLoading(true, "Loading…");
     // PDF.js transfers the buffer to its worker (detaching it), so record what we need for error messages now.
     const probe = src.data ? { size: src.data.length, head: new TextDecoder("latin1").decode(src.data.subarray(0, 1024)) } : undefined;
-    this.loadingTask?.destroy().catch(() => {});
+    // Abort an unfinished load; the displayed document is torn down by setDocument once it is replaced.
+    if (this.loadingTask && this.loadingTask !== this.docTask) this.loadingTask.destroy().catch(() => {});
     const task = pdfjs.getDocument({
       ...src,
       cMapUrl: `${ASSETS}cmaps/`,
@@ -330,11 +331,16 @@ export class LeaflineApp {
     this.docTask = task;
     this.fileName = name;
     this.pendingView = view;
+    // The viewer may still be fetching the previous document's pages (one getPage per page); destroying
+    // that transport first makes PDF.js log an error for every page left, so let the loop drain first.
+    const oldPages = old && old !== task ? this.viewer.pagesPromise : null;
     this.viewer.setDocument(pdf);
     this.linkService.setDocument(pdf, null);
     this.pdfHistory.initialize({ fingerprint: pdf.fingerprints[0] ?? "", resetHistory: true, updateUrl: false });
     this.thumbs.setDocument(pdf);
-    if (old && old !== task) await old.destroy().catch(() => {});
+    if (old && old !== task) {
+      void Promise.race([oldPages ?? Promise.resolve(), new Promise((r) => setTimeout(r, 5000))]).then(() => old.destroy()).catch(() => {});
+    }
     this.app.dataset.state = "loaded";
     $("pageCount").textContent = String(pdf.numPages);
     $<HTMLInputElement>("pageInput").max = String(pdf.numPages);
