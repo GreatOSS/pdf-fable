@@ -2,7 +2,7 @@
   "name": "leafline",
   "productName": "Leafline",
   "version": "0.1.0",
-  "description": "Leafline — a fast, beautiful, open-source PDF viewer and editor that runs entirely in your browser.",
+  "description": "Leafline \u2014 a fast, beautiful, open-source PDF viewer and editor that runs entirely in your browser.",
   "private": true,
   "type": "module",
   "license": "MIT",
@@ -20,7 +20,8 @@
     "preview": "vite preview",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
-    "check": "npm run typecheck && npm run test && vite build"
+    "check": "npm run typecheck && npm run test && vite build",
+    "postinstall": "patch-package"
   },
   "dependencies": {
     "pdf-lib": "^1.17.1",
@@ -28,6 +29,7 @@
   },
   "devDependencies": {
     "@types/node": "^26.6.3",
+    "patch-package": "^8.0.1",
     "typescript": "^7.0.2",
     "vite": "^8.3.1",
     "vitest": "^5.0.2"

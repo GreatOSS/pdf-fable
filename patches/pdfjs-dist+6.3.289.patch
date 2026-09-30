@@ -1,0 +1,14 @@
+diff --git a/node_modules/pdfjs-dist/build/pdf.mjs b/node_modules/pdfjs-dist/build/pdf.mjs
+index c55a629..22c1bca 100644
+--- a/node_modules/pdfjs-dist/build/pdf.mjs
++++ b/node_modules/pdfjs-dist/build/pdf.mjs
+@@ -19618,6 +19618,9 @@ class PopupAnnotationElement extends AnnotationElement {
+     const {
+       container
+     } = this;
++    if (this.popup) {
++      return container;
++    }
+     container.classList.add("popupAnnotation");
+     container.role = "comment";
+     const popup = this.popup = this.#createPopup();

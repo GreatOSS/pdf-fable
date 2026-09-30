@@ -763,6 +763,17 @@ Fixture: generated `samples/big.pdf` (600 A4 text pages, 530 KB).
 - Rough edge: the saved file doubled (530 KB → 1.04 MB) after one page rotation because pdf-lib was saving without object streams. **Fixed**: page operations now save with object streams (530 KB after the rotation). Verified the round trip on top of it: ink drawn on page 300 saved as a 2 KB incremental update, reopened (600 pages, /Rotate 90 and /Ink on page 300, text intact, pypdf reads it); welcome form after rotating page 1: name/checkbox values present in the saved bytes.
 - `npm run check`: 12 tests, build OK.
 
+## Hundred-and-fourth session (existing annotations from other tools, JavaScript OpenAction)
+
+Fixture: `samples/annots.pdf` (two arXiv pages with a pypdf sticky note by "Ada", an external link, a square without appearance stream, a free text, and an `/OpenAction` JavaScript alert).
+
+- The OpenAction script never ran (no dialog, title unchanged); the script stays in the file on save since Leafline does not rewrite what it does not edit.
+- External link renders with `target=_blank rel="noopener noreferrer nofollow"`; PDF.js auto-links the nine author e-mail addresses.
+- Rough edge: hovering or clicking the sticky note showed its title and text **twice**. Cause: PDF.js 6.3.289 (and upstream master) re-renders every synthetic popup when auto-detected links are injected into the annotation layer, creating a second popup body in the same container. Verified with a note on a blank page (no links → one body). **Fixed** with a `patch-package` patch that makes the popup element's render idempotent (`patches/pdfjs-dist+6.3.289.patch`, applied on `postinstall`). After the fix: one body on hover, pin on click, unpin on second click, note still in the saved bytes.
+- The square without an appearance stream draws nothing, as in Firefox (fixture limitation, not a bug).
+- Note for future work: editing files under `node_modules` needs `rm -rf node_modules/.vite` and a dev-server restart, otherwise Vite serves the pre-bundled copy.
+- `npm run check`: 12 tests, build OK.
+
 ## Open issues / follow-ups
 
 - Encrypted documents cannot have their password removed; merge/extract/split are refused on them (pdf-lib cannot re-encrypt).
