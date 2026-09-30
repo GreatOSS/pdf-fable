@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeAll } from "vitest";
-import { PDFDocument, PDFArray, PDFDict, PDFName, PDFRef, StandardFonts } from "pdf-lib";
+import { PDFDocument, PDFArray, PDFDict, PDFHexString, PDFName, PDFNumber, PDFRef, PDFString, StandardFonts } from "pdf-lib";
 import * as ops from "../src/pageops";
 import { readFileSync } from "node:fs";
 
@@ -56,6 +56,58 @@ describe("pageops", () => {
     const annot = octx.lookup((out.getPage(0).node.Annots() as PDFArray).get(0) as PDFRef, PDFDict);
     expect(target(annot.lookup(PDFName.of("A"), PDFDict).lookup(PDFName.of("D"), PDFArray))).toBe(1);
     expect(target(out.catalog.lookup(PDFName.of("Dests"), PDFDict).lookup(PDFName.of("chapter"), PDFArray))).toBe(2);
+  });
+
+  async function outlined(): Promise<Uint8Array> {
+    const doc = await PDFDocument.load(base);
+    const ctx = doc.context;
+    const pages = doc.getPages();
+    const mk = (title: string, page: number | null, extra: Record<string, unknown> = {}) =>
+      ctx.register(ctx.obj({ Title: PDFString.of(title), ...(page === null ? {} : { Dest: [pages[page].ref, "XYZ", 0, 400, null] }), ...extra }));
+    const s1 = mk("Section 1", 1), s2 = mk("Section 2", 3);
+    const chapter = mk("Chapter", 0, { First: s1, Last: s2, Count: 2 });
+    ctx.lookup(s1, PDFDict).set(PDFName.of("Next"), s2);
+    ctx.lookup(s1, PDFDict).set(PDFName.of("Parent"), chapter);
+    ctx.lookup(s2, PDFDict).set(PDFName.of("Parent"), chapter);
+    const appendix = mk("Appendix", 4);
+    ctx.lookup(chapter, PDFDict).set(PDFName.of("Next"), appendix);
+    doc.catalog.set(PDFName.of("Outlines"), ctx.register(ctx.obj({ Type: "Outlines", First: chapter, Last: appendix, Count: 4 })));
+    return doc.save();
+  }
+
+  function outlineTitles(doc: PDFDocument): unknown[] {
+    const ctx = doc.context;
+    const walk = (first: unknown): unknown[] => {
+      const out: unknown[] = [];
+      for (let ref = first; ref instanceof PDFRef; ref = ctx.lookup(ref, PDFDict).get(PDFName.of("Next"))) {
+        const d = ctx.lookup(ref, PDFDict);
+        const dest = d.get(PDFName.of("Dest"));
+        const page = dest instanceof PDFArray ? doc.getPages().findIndex((p) => p.ref.toString() === (dest.get(0) as PDFRef).toString()) : null;
+        const title = d.get(PDFName.of("Title"));
+        out.push([title instanceof PDFString || title instanceof PDFHexString ? title.decodeText() : "?", page, walk(d.get(PDFName.of("First")))]);
+      }
+      return out;
+    };
+    const root = doc.catalog.lookupMaybe(PDFName.of("Outlines"), PDFDict);
+    return root ? walk(root.get(PDFName.of("First"))) : [];
+  }
+
+  it("keeps the matching part of the outline when extracting and splitting", async () => {
+    const src = await outlined();
+    const out = await PDFDocument.load(await ops.extractPages(src, [3, 4]));
+    expect(outlineTitles(out)).toEqual([["Chapter", null, [["Section 2", 0, []]]], ["Appendix", 1, []]]);
+    const parts = await ops.splitPages(src);
+    expect(outlineTitles(await PDFDocument.load(parts[1]))).toEqual([["Chapter", null, [["Section 1", 0, []]]]]);
+    expect(outlineTitles(await PDFDocument.load(parts[2]))).toEqual([]);
+  });
+
+  it("appends the merged document's outline after the existing one", async () => {
+    const src = await outlined();
+    const merged = await PDFDocument.load(await ops.insertPdf(src, src));
+    const titles = outlineTitles(merged);
+    expect(titles.map((t) => (t as unknown[])[0])).toEqual(["Chapter", "Appendix", "Chapter", "Appendix"]);
+    expect((titles[3] as unknown[])[1]).toBe(9); // second copy's appendix points at the copied page
+    expect(merged.catalog.lookup(PDFName.of("Outlines"), PDFDict).lookup(PDFName.of("Count"), PDFNumber).asNumber()).toBe(8);
   });
 
   it("refuses to delete every page", async () => {

@@ -1,6 +1,6 @@
 // Pure page operations on PDF bytes, implemented with pdf-lib.
 // All page indexes are 0-based. Functions never mutate their input.
-import { PDFDocument, PDFArray, PDFDict, PDFName, PDFRef, PDFString, PDFHexString, PDFObject, PDFObjectCopier, degrees, type PDFPage } from "pdf-lib";
+import { PDFDocument, PDFArray, PDFDict, PDFName, PDFNumber, PDFRef, PDFString, PDFHexString, PDFObject, PDFObjectCopier, degrees, type PDFPage } from "pdf-lib";
 
 async function load(bytes: Uint8Array): Promise<PDFDocument> {
   return PDFDocument.load(bytes, { ignoreEncryption: true, updateMetadata: false });
@@ -123,6 +123,125 @@ function retargetDestinations(doc: PDFDocument, removed: Set<string>, replacemen
   if (nameTree instanceof PDFDict) walkNames(nameTree.get(PDFName.of("Dests")));
 }
 
+function textOf(o: PDFObject | undefined): string {
+  return o instanceof PDFString || o instanceof PDFHexString ? o.decodeText() : "";
+}
+
+/** Resolves an outline item's or link's destination to an explicit array within `src` (named destinations included). */
+function resolveDest(src: PDFDocument, holder: PDFDict): PDFArray | undefined {
+  const ctx = src.context;
+  const look = (o: PDFObject | undefined): PDFObject | undefined => (o instanceof PDFRef ? ctx.lookup(o) : o);
+  let dest = look(holder.get(PDFName.of("Dest")));
+  if (!dest) {
+    const a = look(holder.get(PDFName.of("A")));
+    if (a instanceof PDFDict && a.get(PDFName.of("S")) === PDFName.of("GoTo")) dest = look(a.get(PDFName.of("D")));
+  }
+  if (dest instanceof PDFString || dest instanceof PDFHexString || dest instanceof PDFName) {
+    const name = dest instanceof PDFName ? dest.decodeText() : dest.decodeText();
+    const dests = look(src.catalog.get(PDFName.of("Dests")));
+    let found: PDFObject | undefined = dests instanceof PDFDict ? look(dests.get(PDFName.of(name))) : undefined;
+    if (!found) {
+      const tree = look(src.catalog.get(PDFName.of("Names")));
+      const visit = (node: PDFObject | undefined): PDFObject | undefined => {
+        const n = look(node);
+        if (!(n instanceof PDFDict)) return undefined;
+        const names = look(n.get(PDFName.of("Names")));
+        if (names instanceof PDFArray) for (let i = 0; i + 1 < names.size(); i += 2) if (textOf(names.get(i)) === name) return look(names.get(i + 1));
+        const kids = look(n.get(PDFName.of("Kids")));
+        if (kids instanceof PDFArray) for (let i = 0; i < kids.size(); i++) { const r = visit(kids.get(i)); if (r) return r; }
+        return undefined;
+      };
+      if (tree instanceof PDFDict) found = visit(tree.get(PDFName.of("Dests")));
+    }
+    dest = found;
+  }
+  if (dest instanceof PDFDict) dest = look(dest.get(PDFName.of("D")));
+  return dest instanceof PDFArray ? dest : undefined;
+}
+
+/**
+ * Appends to `doc`'s outline the part of `src`'s outline that points at pages in `pageMap`
+ * (source page ref → copied page ref). Headings whose own page was not copied stay as plain
+ * headings when they still have copied descendants, so a chapter keeps its structure.
+ */
+function carryOutline(doc: PDFDocument, src: PDFDocument, pageMap: Map<string, PDFRef>): void {
+  const sctx = src.context, ctx = doc.context;
+  const slook = (o: PDFObject | undefined): PDFObject | undefined => (o instanceof PDFRef ? sctx.lookup(o) : o);
+  const srcRoot = slook(src.catalog.get(PDFName.of("Outlines")));
+  if (!(srcRoot instanceof PDFDict)) return;
+  type Node = { title: string; dest: PDFArray | null; kids: Node[] };
+  const seen = new Set<string>();
+  const collect = (first: PDFObject | undefined): Node[] => {
+    const out: Node[] = [];
+    for (let ref = first; ref instanceof PDFRef && !seen.has(ref.toString()); ) {
+      seen.add(ref.toString());
+      const item = sctx.lookup(ref);
+      if (!(item instanceof PDFDict)) break;
+      const kids = collect(item.get(PDFName.of("First")));
+      const d = resolveDest(src, item);
+      const target = d?.get(0);
+      let dest: PDFArray | null = null;
+      if (d && target instanceof PDFRef && pageMap.has(target.toString())) {
+        dest = ctx.obj([pageMap.get(target.toString())!, ...d.asArray().slice(1).map((o) => (o instanceof PDFRef ? PDFNumber.of(0) : o.clone(ctx)))]);
+      }
+      if (dest || kids.length) out.push({ title: textOf(item.get(PDFName.of("Title"))), dest, kids });
+      ref = item.get(PDFName.of("Next"));
+    }
+    return out;
+  };
+  const nodes = collect(srcRoot.get(PDFName.of("First")));
+  if (!nodes.length) return;
+  const existingRef = doc.catalog.get(PDFName.of("Outlines"));
+  const existing = existingRef instanceof PDFRef ? ctx.lookup(existingRef) : undefined;
+  let rootRef: PDFRef;
+  let root: PDFDict;
+  if (existing instanceof PDFDict && existingRef instanceof PDFRef) {
+    root = existing;
+    rootRef = existingRef;
+  } else {
+    root = ctx.obj({ Type: "Outlines", Count: 0 });
+    rootRef = ctx.register(root);
+    doc.catalog.set(PDFName.of("Outlines"), rootRef);
+  }
+  const count = (list: Node[]): number => list.reduce((n, k) => n + 1 + count(k.kids), 0);
+  const build = (list: Node[], parent: PDFRef): [PDFRef, PDFRef] => {
+    let first: PDFRef | null = null, prev: PDFRef | null = null;
+    for (const n of list) {
+      const dict = ctx.obj({ Title: PDFHexString.fromText(n.title), Parent: parent });
+      if (n.dest) dict.set(PDFName.of("Dest"), n.dest);
+      const ref = ctx.register(dict);
+      if (n.kids.length) {
+        const [f, l] = build(n.kids, ref);
+        dict.set(PDFName.of("First"), f);
+        dict.set(PDFName.of("Last"), l);
+        dict.set(PDFName.of("Count"), PDFNumber.of(count(n.kids)));
+      }
+      if (prev) { dict.set(PDFName.of("Prev"), prev); (ctx.lookup(prev) as PDFDict).set(PDFName.of("Next"), ref); }
+      first ??= ref;
+      prev = ref;
+    }
+    return [first!, prev!];
+  };
+  const [first, last] = build(nodes, rootRef);
+  const oldLast = root.get(PDFName.of("Last"));
+  if (oldLast instanceof PDFRef) {
+    (ctx.lookup(oldLast) as PDFDict).set(PDFName.of("Next"), first);
+    (ctx.lookup(first) as PDFDict).set(PDFName.of("Prev"), oldLast);
+  } else {
+    root.set(PDFName.of("First"), first);
+  }
+  root.set(PDFName.of("Last"), last);
+  const old = root.get(PDFName.of("Count"));
+  root.set(PDFName.of("Count"), PDFNumber.of((old instanceof PDFNumber ? Math.max(0, old.asNumber()) : 0) + count(nodes)));
+}
+
+/** Maps the refs of `indexes` in `src` to the refs of the pages copied into `doc`. */
+function pageRefMap(src: PDFDocument, indexes: number[], copied: PDFPage[]): Map<string, PDFRef> {
+  const m = new Map<string, PDFRef>();
+  indexes.forEach((i, k) => m.set(src.getPage(i).ref.toString(), copied[k].ref));
+  return m;
+}
+
 function normalize(indexes: number[], count: number): number[] {
   return [...new Set(indexes)].filter((i) => i >= 0 && i < count).sort((a, b) => a - b);
 }
@@ -210,6 +329,7 @@ export async function insertPdf(bytes: Uint8Array, other: Uint8Array, index?: nu
   const at = index === undefined ? doc.getPageCount() : Math.max(0, Math.min(index, doc.getPageCount()));
   copied.forEach((p, k) => doc.insertPage(at + k, p));
   adoptFields(doc, copied, src);
+  carryOutline(doc, src, pageRefMap(src, src.getPageIndices(), copied));
   return save(doc);
 }
 
@@ -223,6 +343,7 @@ export async function extractPages(bytes: Uint8Array, indexes: number[]): Promis
   const copied = await doc.copyPages(src, wanted);
   copied.forEach((p) => doc.addPage(p));
   adoptFields(doc, copied, src);
+  carryOutline(doc, src, pageRefMap(src, wanted, copied));
   const title = src.getTitle();
   if (title) doc.setTitle(`${title} (extract)`);
   return save(doc);
@@ -251,6 +372,7 @@ export async function splitPages(bytes: Uint8Array): Promise<Uint8Array[]> {
     const [p] = await doc.copyPages(src, [i]);
     doc.addPage(p);
     adoptFields(doc, [p], src);
+    carryOutline(doc, src, pageRefMap(src, [i], [p]));
     out.push(await save(doc));
   }
   return out;

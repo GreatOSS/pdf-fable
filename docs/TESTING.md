@@ -842,6 +842,14 @@ A throttled local HTTP server (64 KB every 250 ms, CORS enabled) served the samp
 - One console warning surfaced: the page input was set to "NaN" when Delete was triggered with an empty selection (only reachable programmatically, since the selection bar hides without a selection); the app still reloaded the unchanged bytes and recorded an undo entry. **Fixed**: rotate and delete return early without a selection. Verified: programmatic clicks with nothing selected leave the document, busy flag and history untouched; a real single-page delete still works (page input "2", undo toast).
 - `npm run check`: 15 tests, build OK.
 
+## Hundred-and-thirteenth session (extract and merge keep the outline)
+
+`outlined.pdf`: extracted pages 21–25 (Chapter 2) from the sidebar, opened the download; then merged `outlined.pdf` into `second.pdf`.
+
+- Rough edge: the extracted file had no outline ("This document has no outline"), since pdf-lib copies pages but never the outline tree. **Added** in pageops: extract, merge and split carry over the part of the source outline that points at copied pages (explicit, GoTo and named destinations), keeping headings whose own page was left out when they still have copied children; merge appends after the target's existing outline and fixes the root /Count. Two unit tests (17 total).
+- After: the extracted chapter shows Chapter 2 with Sections 2.1–2.3, Section 2.2 jumps to page 3, pypdf resolves all four (root count 4). Merging into a 3-page file appends 33 entries; "Chapter 2" jumps to page 24 (21 + 3).
+- `npm run check`: 17 tests, build OK.
+
 ## Open issues / follow-ups
 
 - Encrypted documents cannot have their password removed; merge/extract/split are refused on them (pdf-lib cannot re-encrypt).
