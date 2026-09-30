@@ -75,6 +75,21 @@ describe("pageops", () => {
     expect(await widths(await ops.insertPdf(base, other, 1))).toEqual([301, 301, 302, 302, 303, 304, 305]);
   });
 
+  it("keeps form fields fillable after merging, renaming clashes", async () => {
+    const other = await makeDoc(2, "other");
+    const doc = await PDFDocument.load(await ops.insertPdf(base, other));
+    expect(doc.getForm().getFields().map((f) => f.getName())).toEqual(["f1", "f1 (2)"]);
+    expect(doc.getForm().getTextField("f1 (2)").acroField.getWidgets().length).toBe(1);
+  });
+
+  it("keeps form fields fillable after extracting and splitting", async () => {
+    const extracted = await PDFDocument.load(await ops.extractPages(base, [0]));
+    expect(extracted.getForm().getFields().map((f) => f.getName())).toEqual(["f1"]);
+    const [first, second] = await ops.splitPages(base);
+    expect((await PDFDocument.load(first)).getForm().getFields().map((f) => f.getName())).toEqual(["f1"]);
+    expect((await PDFDocument.load(second)).getForm().getFields()).toEqual([]);
+  });
+
   it("extracts pages into a new document", async () => {
     const out = await ops.extractPages(base, [4, 0]);
     expect(await widths(out)).toEqual([301, 305]);

@@ -810,6 +810,14 @@ Fixtures: `samples/meta-unicode.pdf` (Japanese/Cyrillic/curly-quote title and au
 - Long unbroken values wrap inside the 640 px dialog (no horizontal overflow, page does not scroll sideways); Escape closes.
 - No product problems found.
 
+## Hundred-and-ninth session (merging and extracting forms)
+
+Merged `welcome.pdf` (four form fields) into `annots.pdf` through the sidebar's Merge button, filled the merged form, then merged the same file a second time.
+
+- Rough edge: the merged file had **no AcroForm**. pdf-lib's copyPages carries the field dictionaries along but never lists them, so pypdf saw no fields and viewers that rely on the AcroForm would show a flat form; Extract and Split had the same gap. **Fixed** in pageops: after copying, the top-level fields behind the copied widgets are registered in the destination AcroForm, clashing top-level names get a " (2)" suffix so both forms stay independently fillable, and DR/DA/NeedAppearances are copied when the target has none. Two unit tests added (14 total).
+- After the fix: merged file has an AcroForm with 4 fields, typed name and ticked checkbox saved; merging the form again gives 8 fields ("name", "name (2)", …) with independent values ("Merged form" / "Second copy") both in the UI and in the saved bytes.
+- `npm run check`: 14 tests, build OK.
+
 ## Open issues / follow-ups
 
 - Encrypted documents cannot have their password removed; merge/extract/split are refused on them (pdf-lib cannot re-encrypt).

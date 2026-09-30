@@ -1,6 +1,6 @@
 // Pure page operations on PDF bytes, implemented with pdf-lib.
 // All page indexes are 0-based. Functions never mutate their input.
-import { PDFDocument, degrees } from "pdf-lib";
+import { PDFDocument, PDFDict, PDFName, PDFRef, PDFString, PDFHexString, PDFObjectCopier, degrees, type PDFPage } from "pdf-lib";
 
 async function load(bytes: Uint8Array): Promise<PDFDocument> {
   return PDFDocument.load(bytes, { ignoreEncryption: true, updateMetadata: false });
@@ -8,6 +8,62 @@ async function load(bytes: Uint8Array): Promise<PDFDocument> {
 
 async function save(doc: PDFDocument): Promise<Uint8Array> {
   return doc.save({ useObjectStreams: true });
+}
+
+function fieldName(dict: PDFDict): string {
+  const t = dict.get(PDFName.of("T"));
+  return t instanceof PDFString || t instanceof PDFHexString ? t.decodeText() : "";
+}
+
+/**
+ * Registers the form fields behind the widget annotations on `pages` (just copied from `src`)
+ * in `doc`'s AcroForm. pdf-lib's copyPages brings the field dictionaries along but never lists
+ * them, which leaves the form flat in most viewers. Colliding top-level names get a suffix so
+ * both forms stay independently fillable; default resources come along when `doc` has none.
+ */
+function adoptFields(doc: PDFDocument, pages: PDFPage[], src: PDFDocument): void {
+  const tops = new Map<string, PDFRef>();
+  for (const page of pages) {
+    const annots = page.node.Annots();
+    if (!annots) continue;
+    for (let i = 0; i < annots.size(); i++) {
+      let ref = annots.get(i);
+      const first = ref instanceof PDFRef ? doc.context.lookup(ref) : ref;
+      if (!(first instanceof PDFDict) || first.get(PDFName.of("Subtype")) !== PDFName.of("Widget")) continue;
+      let dict: PDFDict = first;
+      for (let parent = dict.get(PDFName.of("Parent")); parent instanceof PDFRef; parent = dict.get(PDFName.of("Parent"))) {
+        const d = doc.context.lookup(parent);
+        if (!(d instanceof PDFDict)) break;
+        ref = parent;
+        dict = d;
+      }
+      if (ref instanceof PDFRef) tops.set(ref.toString(), ref);
+    }
+  }
+  if (tops.size === 0) return;
+  const acro = doc.catalog.getOrCreateAcroForm();
+  const listed = new Set(acro.normalizedEntries().Fields.asArray().map((r) => r.toString()));
+  const names = new Set(acro.getFields().map(([f]) => fieldName(f.dict)));
+  for (const [key, ref] of tops) {
+    if (listed.has(key)) continue;
+    const dict = doc.context.lookup(ref) as PDFDict;
+    const base = fieldName(dict);
+    if (base && names.has(base)) {
+      let n = 2;
+      while (names.has(`${base} (${n})`)) n++;
+      dict.set(PDFName.of("T"), PDFHexString.fromText(`${base} (${n})`));
+    }
+    names.add(fieldName(dict));
+    acro.addField(ref);
+  }
+  const srcAcro = src.catalog.AcroForm();
+  if (srcAcro) {
+    const copier = PDFObjectCopier.for(src.context, doc.context);
+    for (const key of ["DR", "DA", "NeedAppearances"]) {
+      const v = srcAcro.get(PDFName.of(key));
+      if (v && !acro.dict.has(PDFName.of(key))) acro.dict.set(PDFName.of(key), copier.copy(v));
+    }
+  }
 }
 
 function normalize(indexes: number[], count: number): number[] {
@@ -84,6 +140,7 @@ export async function insertPdf(bytes: Uint8Array, other: Uint8Array, index?: nu
   const copied = await doc.copyPages(src, src.getPageIndices());
   const at = index === undefined ? doc.getPageCount() : Math.max(0, Math.min(index, doc.getPageCount()));
   copied.forEach((p, k) => doc.insertPage(at + k, p));
+  adoptFields(doc, copied, src);
   return save(doc);
 }
 
@@ -96,6 +153,7 @@ export async function extractPages(bytes: Uint8Array, indexes: number[]): Promis
   const doc = await PDFDocument.create();
   const copied = await doc.copyPages(src, wanted);
   copied.forEach((p) => doc.addPage(p));
+  adoptFields(doc, copied, src);
   const title = src.getTitle();
   if (title) doc.setTitle(`${title} (extract)`);
   return save(doc);
@@ -123,6 +181,7 @@ export async function splitPages(bytes: Uint8Array): Promise<Uint8Array[]> {
     const doc = await PDFDocument.create();
     const [p] = await doc.copyPages(src, [i]);
     doc.addPage(p);
+    adoptFields(doc, [p], src);
     out.push(await save(doc));
   }
   return out;
