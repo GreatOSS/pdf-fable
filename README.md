@@ -1,8 +1,10 @@
 # Leafline
 
+[Open the web app](https://greatoss.github.io/pdf-fable/)
+
 **Leafline** is a fast, private, open-source PDF viewer and editor that runs entirely in your browser. Documents are processed locally and never uploaded anywhere.
 
-> Repository: `GreatOSS/pdf-fable` (private). Product name: Leafline. See [docs/NAMING.md](docs/NAMING.md) for how the name was chosen.
+> Repository: `GreatOSS/pdf-fable` (public). Product name: Leafline. See [docs/NAMING.md](docs/NAMING.md) for how the name was chosen.
 
 ## Features
 
@@ -59,3 +61,7 @@ Issues and pull requests are welcome. Please describe the document type and step
 ## License
 
 MIT. Leafline bundles PDF.js (Apache-2.0) and pdf-lib (MIT).
+
+## GitHub Pages
+
+Pushes to `main` run tests and build the app for `/pdf-fable/`, then deploy `dist/` with GitHub Actions. The workflow can also be started manually. PDF documents continue to be processed locally in the browser.
